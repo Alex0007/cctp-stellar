@@ -9,13 +9,22 @@ body > *{ max-width:680px; margin-left:auto; margin-right:auto; }
 h1{ font-size:22px; margin:0; }
 h2{ font-size:16px; margin:0 0 12px; display:flex; align-items:center; gap:10px; }
 .lede{ color:var(--muted); margin:8px auto 24px; }
+.route{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:12px auto 0; font-size:14px; color:var(--text); }
+.route-sep{ width:1px; height:18px; background:var(--border); }
+.route-dir{ display:inline-flex; align-items:center; gap:8px; cursor:default; outline:none; }
+.route-node{ display:inline-flex; align-items:center; gap:6px; }
+.route-node img{ display:block; }
+.route-arrow{ color:var(--muted); }
+/* the note appears only when someone goes for the direction: hover, keyboard focus or a tap */
+.route-note{ font-size:13px; color:var(--muted); visibility:hidden; }
+.route-dir:hover + .route-note, .route-dir:focus + .route-note{ visibility:visible; }
 select.lang{ font:inherit; font-size:13px; color:var(--text); background:#fff; border:1px solid var(--border); border-radius:6px; padding:5px 8px; }
 
 .step{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin-top:14px; }
-.step[data-state="idle"]{ opacity:.55; }
-.step[data-state="idle"] button, .step[data-state="idle"] input{ pointer-events:none; }
-/* the burn hash field is the entry point for resuming a transfer, so it stays usable */
-.step[data-state="idle"] #burnTx{ pointer-events:auto; }
+/* a step that is not reached yet is dimmed child by child, so one part of it
+   can opt out: the burn hash field is the entry point for resuming a transfer */
+.step[data-state="idle"] > :not(.resume){ opacity:.55; }
+.step[data-state="idle"] > :not(.resume) button, .step[data-state="idle"] > :not(.resume) input{ pointer-events:none; }
 .step[data-state="done"] .num{ background:var(--ok); }
 .step[data-state="error"] .num{ background:var(--err); }
 .num{ display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; border-radius:50%; background:var(--border-strong); color:#fff; font-size:13px; font-weight:600; }

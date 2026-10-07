@@ -1,6 +1,7 @@
 {
   "title": "USDC from Polygon to Stellar",
-  "lede": "Burns USDC on Polygon and mints the same amount as native USDC on Stellar through Circle's CCTP. No bridge tokens, no custody: your wallets sign, this page only prepares the transactions.",
+  "route.only": "The only direction for now",
+  "lede": "The page burns USDC on Polygon and receives the same amount on Stellar through Circle's CCTP. What arrives is native USDC, the one Circle issues. Your wallets sign the transactions; the page only builds them and submits them to the network.",
   "step1.title": "From and to",
   "step1.from": "Polygon account",
   "step1.connectMetaMask": "Connect MetaMask",

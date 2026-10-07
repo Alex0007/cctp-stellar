@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
   <title>USDC from Polygon to Stellar</title>
+  <link rel="icon" href="/brand/usdc.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
@@ -12,6 +13,16 @@
     <h1 data-i18n="title">USDC from Polygon to Stellar</h1>
     <select id="lang" class="lang" aria-label="Language"></select>
   </header>
+  <p class="route">
+    <span class="route-node"><img src="/brand/usdc.svg" width="20" height="20" alt="">USDC</span>
+    <span class="route-sep" aria-hidden="true"></span>
+    <span class="route-dir" tabindex="0" data-i18n-title="route.only">
+      <span class="route-node"><img src="/brand/polygon.svg" width="22" height="20" alt="">Polygon</span>
+      <span class="route-arrow" aria-hidden="true">→</span>
+      <span class="route-node"><img src="/brand/stellar.svg" width="20" height="20" alt="">Stellar</span>
+    </span>
+    <span class="route-note" data-i18n="route.only"></span>
+  </p>
   <p class="lede" data-i18n="lede"></p>
 
   <section class="step" id="step1" data-state="active">
@@ -58,7 +69,7 @@
 
   <section class="step" id="step3" data-state="idle">
     <h2><span class="num">3</span> <span data-i18n="step3.title"></span></h2>
-    <div class="field">
+    <div class="field resume">
       <label for="burnTx" data-i18n="step3.burnTx"></label>
       <input id="burnTx" placeholder="0x…" autocomplete="off" spellcheck="false">
       <p class="hint" data-i18n="step3.resume"></p>
