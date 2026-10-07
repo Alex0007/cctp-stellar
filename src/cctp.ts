@@ -89,19 +89,30 @@ export interface StellarAccountInfo {
   exists: boolean;
   trustline: boolean;
   xlm: number;
+  /** XLM above the reserve and liabilities, what can actually pay a fee */
+  spendableXlm: number;
 }
 
 // What Horizon knows about an account: whether it exists, holds the USDC trustline, has XLM.
 export async function stellarAccount(address: string): Promise<StellarAccountInfo> {
   const res = await fetch(`${HORIZON}/accounts/${address}`);
-  if (res.status === 404) return { exists: false, trustline: false, xlm: 0 };
+  if (res.status === 404) return { exists: false, trustline: false, xlm: 0, spendableXlm: 0 };
   if (!res.ok) throw new AppError('err.horizon', { status: res.status });
-  const data: { balances: { asset_type: string; asset_code?: string; asset_issuer?: string; balance: string }[] } = await res.json();
+  const data: {
+    balances: { asset_type: string; asset_code?: string; asset_issuer?: string; balance: string; selling_liabilities?: string }[];
+    subentry_count: number;
+    num_sponsoring: number;
+    num_sponsored: number;
+  } = await res.json();
   const native = data.balances.find((b) => b.asset_type === 'native');
+  const xlm = Number(native?.balance ?? 0);
+  // base reserve 0.5 XLM: two for the account itself plus one per subentry (trustlines, offers, signers)
+  const reserve = (2 + data.subentry_count + data.num_sponsoring - data.num_sponsored) * 0.5;
   return {
     exists: true,
     trustline: data.balances.some((b) => b.asset_code === 'USDC' && b.asset_issuer === STELLAR_USDC_ISSUER),
-    xlm: Number(native?.balance ?? 0),
+    xlm,
+    spendableXlm: Math.max(0, xlm - reserve - Number(native?.selling_liabilities ?? 0)),
   };
 }
 
@@ -215,7 +226,8 @@ export function decodeBurnMessage(messageHex: string) {
 export async function prepareMint({ msg, signer }: { msg: IrisMessage; signer: string }): Promise<string> {
   const info = await stellarAccount(signer);
   if (!info.exists) throw new AppError('err.noSignerAccount');
-  if (info.xlm < 0.5) throw new AppError('err.noXlm', { xlm: info.xlm });
+  // the mint has cost about 0.03 XLM in practice; the max fee set below is 0.1 XLM
+  if (info.spendableXlm < 0.15) throw new AppError('err.noXlm', { xlm: info.spendableXlm.toFixed(2) });
   const account = await soroban.getAccount(signer);
   const op = new Contract(CCTP_FORWARDER).call(
     'mint_and_forward',

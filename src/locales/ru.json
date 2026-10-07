@@ -6,7 +6,7 @@
   "needs.title": "Требования",
   "needs.usdc": "USDC в Polygon в <a class=\"wallet\" href=\"https://metamask.io\" target=\"_blank\" rel=\"noopener\"><img src=\"/brand/metamask.svg\" alt=\"\">MetaMask</a> и несколько центов в POL на газ: две транзакции",
   "needs.trustline": "Аккаунт Stellar с trustline к USDC: на него придёт перевод",
-  "needs.xlm": "<a class=\"wallet\" href=\"https://albedo.link\" target=\"_blank\" rel=\"noopener\"><img src=\"/brand/albedo.png\" alt=\"\">Albedo</a> или <a class=\"wallet\" href=\"https://freighter.app\" target=\"_blank\" rel=\"noopener\"><img src=\"/brand/freighter.png\" alt=\"\">Freighter</a> с аккаунтом Stellar, на котором есть немного XLM на комиссию, один перевод стоит меньше 1 XLM: он подписывает и отправляет финальную транзакцию, вызов контракта. Обычно это тот же аккаунт, что и получатель, но подойдёт любой",
+  "needs.xlm": "<a class=\"wallet\" href=\"https://albedo.link\" target=\"_blank\" rel=\"noopener\"><img src=\"/brand/albedo.png\" alt=\"\">Albedo</a> или <a class=\"wallet\" href=\"https://freighter.app\" target=\"_blank\" rel=\"noopener\"><img src=\"/brand/freighter.png\" alt=\"\">Freighter</a> с аккаунтом Stellar, на котором есть немного XLM сверх резерва, комиссия около 0.03 XLM за перевод: он подписывает и отправляет финальную транзакцию, вызов контракта. Обычно это тот же аккаунт, что и получатель, но подойдёт любой",
   "step1.title": "Откуда и куда",
   "step1.from": "Аккаунт в Polygon",
   "step1.connectMetaMask": "Подключить MetaMask",
@@ -78,6 +78,6 @@
   "err.stellarUnconfirmed": "Транзакция в Stellar ещё не подтверждена: {hash}",
   "err.attestationTimeout": "Подтверждения нет уже час. Сожжённые USDC не пропали: вернитесь позже и нажмите «Подготовить» ещё раз.",
   "err.noGas": "На аккаунте Polygon нет POL: разрешению и сжиганию нужен газ",
-  "err.noXlm": "На отправляющем аккаунте Stellar {xlm} XLM; пополните его для комиссии сети",
+  "err.noXlm": "На отправляющем аккаунте Stellar {xlm} XLM сверх резерва; на комиссию нужно чуть больше",
   "or": "или"
 }
