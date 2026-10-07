@@ -1,0 +1,5 @@
+name = "cctp-stellar"
+compatibility_date = "2026-10-07"
+
+# Cloudflare Pages: serve the Vite build output.
+pages_build_output_dir = "dist"
