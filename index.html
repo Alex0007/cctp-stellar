@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>USDC from Polygon to Stellar</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <header class="top">
+    <h1 data-i18n="title">USDC from Polygon to Stellar</h1>
+    <select id="lang" class="lang" aria-label="Language"></select>
+  </header>
+  <p class="lede" data-i18n="lede"></p>
+
+  <section class="step" id="step1" data-state="active">
+    <h2><span class="num">1</span> <span data-i18n="step1.title"></span></h2>
+    <div class="field">
+      <label for="evm" data-i18n="step1.from"></label>
+      <div class="row">
+        <input id="evm" readonly placeholder="0x…" autocomplete="off">
+        <button type="button" id="connectEvm" data-i18n="step1.connectMetaMask"></button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="recipient" data-i18n="step1.to"></label>
+      <div class="row">
+        <input id="recipient" readonly placeholder="G…" autocomplete="off" spellcheck="false">
+        <button type="button" data-connect="recipient" data-wallet="albedo">Albedo</button>
+        <button type="button" data-connect="recipient" data-wallet="freighter">Freighter</button>
+      </div>
+      <p class="hint"><span data-i18n="step1.toHint"></span> <button type="button" class="link" id="otherRecipient" data-i18n="step1.otherRecipient"></button></p>
+      <p class="hint warn" id="recipientWarning" hidden data-i18n="step1.noMemo"></p>
+    </div>
+    <div class="field">
+      <label for="amount" data-i18n="step1.amount"></label>
+      <div class="row">
+        <input id="amount" inputmode="decimal" autocomplete="off" class="short">
+        <button type="button" id="max" data-i18n="step1.max"></button>
+      </div>
+      <p class="hint" data-i18n="step1.amountHint"></p>
+    </div>
+    <div class="row">
+      <button type="button" id="check" class="primary" data-i18n="step1.check"></button>
+    </div>
+    <p class="status" id="status1"></p>
+  </section>
+
+  <section class="step" id="step2" data-state="idle">
+    <h2><span class="num">2</span> <span data-i18n="step2.title"></span></h2>
+    <p data-i18n="step2.text"></p>
+    <div class="row">
+      <button type="button" id="burn" class="primary" data-i18n="step2.burn"></button>
+    </div>
+    <p class="status" id="status2"></p>
+  </section>
+
+  <section class="step" id="step3" data-state="idle">
+    <h2><span class="num">3</span> <span data-i18n="step3.title"></span></h2>
+    <div class="field">
+      <label for="burnTx" data-i18n="step3.burnTx"></label>
+      <input id="burnTx" placeholder="0x…" autocomplete="off" spellcheck="false">
+      <p class="hint" data-i18n="step3.resume"></p>
+    </div>
+    <div class="field" id="signerPick">
+      <label data-i18n="step3.signer"></label>
+      <div class="row">
+        <button type="button" data-connect="signer" data-wallet="albedo">Albedo</button>
+        <button type="button" data-connect="signer" data-wallet="freighter">Freighter</button>
+      </div>
+      <p class="hint" data-i18n="step3.signerHint"></p>
+    </div>
+    <p class="field" id="signerKnown" hidden>
+      <span id="signerText"></span>
+      <button type="button" class="link" id="signerChange" data-i18n="step3.changeSigner"></button>
+    </p>
+    <div class="row">
+      <button type="button" id="prepare" class="primary" data-i18n="step3.prepare"></button>
+      <button type="button" id="sign" class="primary" hidden></button>
+    </div>
+    <p class="status" id="status3"></p>
+  </section>
+
+  <details class="log">
+    <summary data-i18n="log"></summary>
+    <pre id="log"></pre>
+  </details>
+
+  <footer>
+    <h2 data-i18n="contracts.title"></h2>
+    <ul class="contracts" id="contracts"></ul>
+    <p class="hint" data-i18n="contracts.note"></p>
+    <p><span data-i18n="footer.source"></span>: <a href="https://github.com/Alex0007/cctp-stellar">github.com/Alex0007/cctp-stellar</a></p>
+  </footer>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
