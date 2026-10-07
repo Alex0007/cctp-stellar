@@ -51,6 +51,7 @@ Deployed as a Cloudflare Worker with static assets (`wrangler.toml`).
 - `src/wallets/`: wallet adapters. `stellar.ts` exposes `connect()` and `sign(xdr, address)` per wallet; a signer must start its popup synchronously from the click, so no `await` before the wallet call.
 - `src/main.ts`: the three-step UI and its state.
 - `src/i18n.ts`, `src/locales/*.json`: translations. Add a language by adding a JSON file and importing it in `i18n.ts`.
+- `docs/cover.html`: source of the social card `public/og.png`; open it in a browser at 1200×630 and screenshot it.
 - `public/brand/`: the USDC token mark from [Circle's brand kit](https://www.circle.com/brand), the Polygon mark from the [Polygon brand kit](https://polygon.technology/brand-kit) and the Stellar symbol from the [Stellar press kit](https://stellar.org/brand), used to refer to the asset and the networks.
 
 ## Contracts
