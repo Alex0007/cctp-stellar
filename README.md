@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="public/brand/usdc.svg" width="56" height="56" alt="USDC">
-  &nbsp;&nbsp;<img src="public/brand/polygon.svg" width="52" height="47" alt="Polygon">
-  &nbsp;&nbsp;<img src="docs/arrow.svg" width="40" height="20" alt="to">&nbsp;&nbsp;
-  <img src="public/brand/stellar.svg" width="52" height="52" alt="Stellar">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/header-dark.svg">
+    <img src="docs/header.svg" width="300" height="64" alt="USDC, Polygon to Stellar">
+  </picture>
 </p>
 
 <h1 align="center">cctp-stellar</h1>
