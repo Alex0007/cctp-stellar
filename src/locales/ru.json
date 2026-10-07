@@ -8,7 +8,7 @@
   "needs.trustline": "Аккаунт Stellar с trustline к USDC: на него придёт перевод",
   "needs.xlm": "<a class=\"wallet\" href=\"https://albedo.link\" target=\"_blank\" rel=\"noopener\"><img src=\"/brand/albedo.png\" alt=\"\">Albedo</a> или <a class=\"wallet\" href=\"https://freighter.app\" target=\"_blank\" rel=\"noopener\"><img src=\"/brand/freighter.png\" alt=\"\">Freighter</a> с аккаунтом Stellar, на котором есть немного XLM сверх резерва, комиссия около 0.03 XLM за перевод: он подписывает и отправляет финальную транзакцию, вызов контракта. Обычно это тот же аккаунт, что и получатель, но подойдёт любой",
   "step1.title": "Откуда и куда",
-  "step1.from": "Аккаунт в Polygon",
+  "step1.from": "Отправитель в Polygon",
   "step1.connectMetaMask": "Подключить MetaMask",
   "step1.to": "Получатель в Stellar",
   "step1.toHint": "Подключите кошелёк, который получит USDC. У него уже должен быть trustline к USDC.",

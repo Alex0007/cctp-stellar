@@ -8,7 +8,7 @@
   "needs.trustline": "A Stellar account with a USDC trustline: the USDC will arrive there",
   "needs.xlm": "<a class=\"wallet\" href=\"https://albedo.link\" target=\"_blank\" rel=\"noopener\"><img src=\"/brand/albedo.png\" alt=\"\">Albedo</a> or <a class=\"wallet\" href=\"https://freighter.app\" target=\"_blank\" rel=\"noopener\"><img src=\"/brand/freighter.png\" alt=\"\">Freighter</a> with a Stellar account that has a little XLM above the reserve, the fee is about 0.03 XLM per transfer: it signs and sends the final transaction, the contract call. Usually the same account as the recipient, but any account will do",
   "step1.title": "From and to",
-  "step1.from": "Polygon account",
+  "step1.from": "Polygon sender",
   "step1.connectMetaMask": "Connect MetaMask",
   "step1.to": "Stellar recipient",
   "step1.toHint": "Connect the wallet that will receive the USDC. It must already hold a USDC trustline.",
