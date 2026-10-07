@@ -1,5 +1,6 @@
 {
   "title": "USDC из Polygon в Stellar",
+  "meta.title": "USDC из Polygon в Stellar: Circle CCTP, без дополнительных комиссий",
   "route.only": "Пока единственное направление",
   "lede": "Вы сжигаете USDC в Polygon и получаете ту же сумму в Stellar через <a href=\"https://developers.circle.com/cctp\" target=\"_blank\" rel=\"noopener\">CCTP от Circle</a>. В Stellar приходит нативный USDC от Circle. Транзакции подписывают ваши кошельки, страница только собирает их и отправляет в сеть.",
   "step1.title": "Откуда и куда",

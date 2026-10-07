@@ -35,7 +35,7 @@ export const onLangChange = (fn: (lang: string) => void) => listeners.add(fn);
 
 export function apply(): void {
   document.documentElement.lang = lang;
-  document.title = t('title');
+  document.title = t('meta.title');
   document.querySelectorAll<HTMLElement>('[data-i18n]').forEach((el) => (el.textContent = t(el.dataset.i18n!)));
   document.querySelectorAll<HTMLElement>('[data-i18n-html]').forEach((el) => (el.innerHTML = t(el.dataset.i18nHtml!)));
   document.querySelectorAll<HTMLInputElement>('[data-i18n-placeholder]').forEach((el) => (el.placeholder = t(el.dataset.i18nPlaceholder!)));
