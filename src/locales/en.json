@@ -78,5 +78,6 @@
   "err.stellarUnconfirmed": "The Stellar transaction is not confirmed yet: {hash}",
   "err.attestationTimeout": "No attestation after an hour. The burn is safe: come back later and press Prepare again.",
   "err.noGas": "No POL on the Polygon account: the approval and the burn need gas",
-  "err.noXlm": "The submitting Stellar account has {xlm} XLM; add some for the network fee"
+  "err.noXlm": "The submitting Stellar account has {xlm} XLM; add some for the network fee",
+  "or": "or"
 }

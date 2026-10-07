@@ -59,15 +59,18 @@
       <label for="evm" data-i18n="step1.from"></label>
       <div class="row">
         <input id="evm" readonly placeholder="0x…" autocomplete="off">
-        <button type="button" id="connectEvm" data-i18n="step1.connectMetaMask"></button>
+        <span class="actions"><button type="button" id="connectEvm"><img class="btn-icon" src="/brand/metamask.svg" alt=""><span data-i18n="step1.connectMetaMask"></span></button></span>
       </div>
     </div>
     <div class="field">
       <label for="recipient" data-i18n="step1.to"></label>
       <div class="row">
         <input id="recipient" readonly placeholder="G…" autocomplete="off" spellcheck="false">
-        <button type="button" data-connect="recipient" data-wallet="albedo">Albedo</button>
-        <button type="button" data-connect="recipient" data-wallet="freighter">Freighter</button>
+        <span class="actions">
+          <button type="button" data-connect="recipient" data-wallet="albedo"><img class="btn-icon" src="/brand/albedo.png" alt="">Albedo</button>
+          <span class="or" data-i18n="or"></span>
+          <button type="button" data-connect="recipient" data-wallet="freighter"><img class="btn-icon" src="/brand/freighter.png" alt="">Freighter</button>
+        </span>
       </div>
       <p class="hint"><span data-i18n="step1.toHint"></span> <button type="button" class="link" id="otherRecipient" data-i18n="step1.otherRecipient"></button></p>
       <p class="hint warn" id="recipientWarning" hidden data-i18n="step1.noMemo"></p>
@@ -105,8 +108,11 @@
     <div class="field" id="signerPick">
       <label data-i18n="step3.signer"></label>
       <div class="row">
-        <button type="button" data-connect="signer" data-wallet="albedo">Albedo</button>
-        <button type="button" data-connect="signer" data-wallet="freighter">Freighter</button>
+        <span class="actions">
+          <button type="button" data-connect="signer" data-wallet="albedo"><img class="btn-icon" src="/brand/albedo.png" alt="">Albedo</button>
+          <span class="or" data-i18n="or"></span>
+          <button type="button" data-connect="signer" data-wallet="freighter"><img class="btn-icon" src="/brand/freighter.png" alt="">Freighter</button>
+        </span>
       </div>
       <p class="hint" data-i18n="step3.signerHint"></p>
     </div>
