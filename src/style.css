@@ -14,6 +14,8 @@ select.lang{ font:inherit; font-size:13px; color:var(--text); background:#fff; b
 .step{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin-top:14px; }
 .step[data-state="idle"]{ opacity:.55; }
 .step[data-state="idle"] button, .step[data-state="idle"] input{ pointer-events:none; }
+/* the burn hash field is the entry point for resuming a transfer, so it stays usable */
+.step[data-state="idle"] #burnTx{ pointer-events:auto; }
 .step[data-state="done"] .num{ background:var(--ok); }
 .step[data-state="error"] .num{ background:var(--err); }
 .num{ display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; border-radius:50%; background:var(--border-strong); color:#fff; font-size:13px; font-weight:600; }
@@ -43,9 +45,20 @@ button.link{ border:0; background:none; padding:0 0 0 6px; font-weight:400; colo
 .log summary{ cursor:pointer; font-size:13px; }
 .log pre{ margin:8px 0 0; padding:12px; background:#fff; border:1px solid var(--border); border-radius:6px; white-space:pre-wrap; word-break:break-word; max-height:280px; overflow:auto; font:12px/1.5 ui-monospace, Menlo, monospace; color:var(--text); }
 
-footer{ margin-top:36px; padding-top:18px; border-top:1px solid var(--border); font-size:13px; color:var(--muted); }
-footer h2{ font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
-.contracts{ list-style:none; padding:0; margin:0; }
-.contracts li{ margin:4px 0; }
-.contracts code{ font:12px ui-monospace, Menlo, monospace; word-break:break-all; }
-footer a{ color:var(--text); }
+footer{ margin-top:40px; font-size:13px; color:var(--muted); }
+.contracts-block{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 20px; }
+footer h2{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+.contracts{ display:flex; flex-direction:column; }
+.contract{ display:grid; grid-template-columns:72px 1fr; grid-template-areas:"chain name" "chain address"; column-gap:12px; row-gap:2px; align-items:start; padding:8px 0; border-top:1px solid var(--border); }
+.contract:first-child{ border-top:0; padding-top:0; }
+.chain{ grid-area:chain; justify-self:start; margin-top:2px; font-size:11px; font-weight:600; letter-spacing:.04em; padding:2px 7px; border-radius:999px; color:#fff; }
+.chain.polygon{ background:#7b3fe4; }
+.chain.stellar{ background:#1c2b30; }
+.contract-name{ grid-area:name; color:var(--text); font-weight:600; }
+.contract-address{ grid-area:address; color:var(--muted); text-decoration:none; }
+.contract-address:hover{ color:var(--text); text-decoration:underline; text-underline-offset:3px; }
+.contract-address code{ font:12px ui-monospace, Menlo, monospace; word-break:break-all; }
+.contracts-block .hint a{ color:var(--text); }
+.footer-links{ display:flex; flex-wrap:wrap; gap:6px 18px; margin-top:16px; padding:0 4px; }
+.footer-links a{ color:var(--muted); text-decoration:none; }
+.footer-links a:hover{ color:var(--text); text-decoration:underline; text-underline-offset:3px; }

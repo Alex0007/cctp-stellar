@@ -248,19 +248,32 @@ $('max').onclick = () =>
 $('check').onclick = () => run(1, check);
 $('burn').onclick = () => run(2, burn);
 $('prepare').onclick = () => run(3, prepare);
+// Pasting a burn hash wakes step 3 up: that is how a transfer is resumed.
+input('burnTx').oninput = () => {
+  if (cctp.isTxHash(input('burnTx').value.trim()) && $('step3').dataset.state === 'idle') {
+    setStep(3, 'active');
+    status(3, 'status.needSigner');
+  }
+};
 $('sign').onclick = sign;
 
 // ---- footer, language, resume
 
-const contracts: [string, string, (a: string) => string][] = [
-  ['contracts.usdc', cctp.POLYGON_USDC, cctp.links.polygonAddress],
-  ['contracts.messenger', cctp.TOKEN_MESSENGER_V2, cctp.links.polygonAddress],
-  ['contracts.forwarder', cctp.CCTP_FORWARDER, cctp.links.stellarContract],
-  ['contracts.issuer', cctp.STELLAR_USDC_ISSUER, cctp.links.stellarAccount],
+const contracts: { key: string; chain: 'polygon' | 'stellar'; address: string; link: (a: string) => string }[] = [
+  { key: 'contracts.usdc', chain: 'polygon', address: cctp.POLYGON_USDC, link: cctp.links.polygonAddress },
+  { key: 'contracts.messenger', chain: 'polygon', address: cctp.TOKEN_MESSENGER_V2, link: cctp.links.polygonAddress },
+  { key: 'contracts.forwarder', chain: 'stellar', address: cctp.CCTP_FORWARDER, link: cctp.links.stellarContract },
+  { key: 'contracts.issuer', chain: 'stellar', address: cctp.STELLAR_USDC_ISSUER, link: cctp.links.stellarAccount },
 ];
 function renderContracts() {
   $('contracts').innerHTML = contracts
-    .map(([key, addr, link]) => `<li>${t(key)}: <a href="${link(addr)}" target="_blank" rel="noopener"><code>${addr}</code></a></li>`)
+    .map(
+      (c) => `<div class="contract">
+        <span class="chain ${c.chain}">${t('chain.' + c.chain)}</span>
+        <span class="contract-name">${t(c.key)}</span>
+        <a class="contract-address" href="${c.link(c.address)}" target="_blank" rel="noopener" title="${c.address}"><code>${c.address}</code></a>
+      </div>`,
+    )
     .join('');
 }
 
