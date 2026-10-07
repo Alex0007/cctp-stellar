@@ -263,6 +263,7 @@ const contracts: { key: string; chain: 'polygon' | 'stellar'; address: string; l
   { key: 'contracts.usdc', chain: 'polygon', address: cctp.POLYGON_USDC, link: cctp.links.polygonAddress },
   { key: 'contracts.messenger', chain: 'polygon', address: cctp.TOKEN_MESSENGER_V2, link: cctp.links.polygonAddress },
   { key: 'contracts.forwarder', chain: 'stellar', address: cctp.CCTP_FORWARDER, link: cctp.links.stellarContract },
+  { key: 'contracts.stellarUsdc', chain: 'stellar', address: `USDC-${cctp.STELLAR_USDC_ISSUER}`, link: () => cctp.links.stellarAsset('USDC', cctp.STELLAR_USDC_ISSUER) },
   { key: 'contracts.issuer', chain: 'stellar', address: cctp.STELLAR_USDC_ISSUER, link: cctp.links.stellarAccount },
 ];
 function renderContracts() {

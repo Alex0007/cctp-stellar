@@ -243,4 +243,5 @@ export const links = {
   stellarTx: (h: string) => `https://stellar.expert/explorer/public/tx/${h}`,
   stellarAccount: (a: string) => `https://stellar.expert/explorer/public/account/${a}`,
   stellarContract: (a: string) => `https://stellar.expert/explorer/public/contract/${a}`,
+  stellarAsset: (code: string, issuer: string) => `https://stellar.expert/explorer/public/asset/${code}-${issuer}`,
 };

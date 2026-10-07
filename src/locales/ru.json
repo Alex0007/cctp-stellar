@@ -30,6 +30,7 @@
   "contracts.usdc": "USDC в Polygon",
   "contracts.messenger": "TokenMessengerV2 от Circle в Polygon",
   "contracts.forwarder": "CctpForwarder от Circle в Stellar",
+  "contracts.stellarUsdc": "USDC в Stellar",
   "contracts.issuer": "Эмитент USDC в Stellar",
   "contracts.note": "Сверьте их с адресами, которые публикует Circle, прежде чем что-то подписывать.",
   "contracts.circleDocs": "Список Circle для Stellar",

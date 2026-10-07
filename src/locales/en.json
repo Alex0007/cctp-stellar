@@ -30,6 +30,7 @@
   "contracts.usdc": "USDC on Polygon",
   "contracts.messenger": "Circle TokenMessengerV2 on Polygon",
   "contracts.forwarder": "Circle CctpForwarder on Stellar",
+  "contracts.stellarUsdc": "USDC on Stellar",
   "contracts.issuer": "USDC issuer on Stellar",
   "contracts.note": "Compare them with the addresses Circle publishes before signing anything.",
   "contracts.circleDocs": "Circle's list for Stellar",
