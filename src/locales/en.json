@@ -1,7 +1,7 @@
 {
   "title": "USDC from Polygon to Stellar",
   "route.only": "The only direction for now",
-  "lede": "You burn USDC on Polygon and receive the same amount on Stellar through <a href=\"https://developers.circle.com/cctp\" target=\"_blank\" rel=\"noopener\">Circle's CCTP</a>. What arrives is native USDC, the one Circle issues. Your wallets sign the transactions; the page only builds them and submits them to the network.",
+  "lede": "You burn USDC on Polygon and receive the same amount on Stellar through <a href=\"https://developers.circle.com/cctp\" target=\"_blank\" rel=\"noopener\">Circle's CCTP</a>. What arrives is USDC issued by Circle itself. Your wallets sign the transactions; the page only builds them and submits them to the network.",
   "step1.title": "From and to",
   "step1.from": "Polygon account",
   "step1.connectMetaMask": "Connect MetaMask",
