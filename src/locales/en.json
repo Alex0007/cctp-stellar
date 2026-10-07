@@ -25,7 +25,7 @@
   "step3.burnTx": "Polygon burn transaction",
   "step3.resume": "Burned earlier and did not finish? Paste the burn hash here: the recipient and the amount are inside Circle's message.",
   "step3.signer": "Stellar account that submits the transaction",
-  "step3.signerHint": "Any account can submit it; it only pays the network fee in XLM. The USDC goes to the recipient from the message.",
+  "step3.signerHint": "Usually this is the recipient's own wallet. Any other Stellar account can submit it instead: the submitter only pays the network fee in XLM, the USDC still go to the recipient from the message.",
   "step3.signerKnown": "The transaction will be submitted by {address} ({wallet}).",
   "step3.changeSigner": "change",
   "step3.prepare": "Prepare",
