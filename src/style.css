@@ -21,6 +21,17 @@ h2{ font-size:16px; margin:0 0 12px; display:flex; align-items:center; gap:10px;
 .route-dir:hover + .route-note, .route-dir:focus + .route-note{ visibility:visible; }
 select.lang{ font:inherit; font-size:13px; color:var(--text); background:#fff; border:1px solid var(--border); border-radius:6px; padding:5px 8px; }
 
+.needs{ margin:0 auto 6px; padding:10px 18px; border:1px dashed var(--border); border-radius:var(--radius); font-size:14px; }
+.needs summary{ display:flex; align-items:center; gap:8px; cursor:pointer; list-style:none; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.needs summary::-webkit-details-marker{ display:none; }
+.needs summary::before{ content:""; width:4px; height:4px; border-right:1px solid currentColor; border-bottom:1px solid currentColor; transform:translateY(-1px) rotate(-45deg); margin-left:2px; transition:transform .15s; }
+.needs[open] summary::before{ transform:translateY(-2px) rotate(45deg); }
+.needs[open] summary{ margin-bottom:6px; }
+.needs ul{ margin:0; padding-left:18px; }
+.needs li{ margin:3px 0; }
+.needs .wallet{ color:inherit; text-decoration:underline; text-underline-offset:3px; white-space:nowrap; }
+.needs .wallet img{ width:16px; height:16px; border-radius:4px; vertical-align:-3px; margin-right:4px; }
+
 .step{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin-top:14px; }
 /* a step that is not reached yet is dimmed child by child, so one part of it
    can opt out: the burn hash field is the entry point for resuming a transfer */

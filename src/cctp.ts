@@ -105,6 +105,10 @@ export async function stellarAccount(address: string): Promise<StellarAccountInf
   };
 }
 
+export function gasBalance(evm: EvmAddress): Promise<bigint> {
+  return publicClient.getBalance({ address: evm });
+}
+
 export function usdcBalance(evm: EvmAddress): Promise<bigint> {
   return publicClient.readContract({ address: POLYGON_USDC, abi: erc20Abi, functionName: 'balanceOf', args: [evm] });
 }
@@ -117,12 +121,14 @@ export interface TransferInputs {
 
 // Everything that can be checked without a signature. Throws an AppError on the first problem.
 export async function check({ evm, recipient, amount }: TransferInputs) {
-  const [balance, allowance, fee, account] = await Promise.all([
+  const [balance, allowance, fee, account, gas] = await Promise.all([
     usdcBalance(evm),
     publicClient.readContract({ address: POLYGON_USDC, abi: erc20Abi, functionName: 'allowance', args: [evm, TOKEN_MESSENGER_V2] }),
     standardFee(amount),
     stellarAccount(recipient),
+    gasBalance(evm),
   ]);
+  if (gas === 0n) throw new AppError('err.noGas');
   if (!account.exists) throw new AppError('err.noAccount');
   if (!account.trustline) throw new AppError('err.noTrustline');
   if (balance < amount) throw new AppError('err.balance', { balance: formatUsdc(balance) });
@@ -207,9 +213,10 @@ export function decodeBurnMessage(messageHex: string) {
 
 // Builds and simulates mint_and_forward. Returns the XDR to sign; any Stellar account may sign it.
 export async function prepareMint({ msg, signer }: { msg: IrisMessage; signer: string }): Promise<string> {
-  const account = await soroban.getAccount(signer).catch(() => {
-    throw new AppError('err.noSignerAccount');
-  });
+  const info = await stellarAccount(signer);
+  if (!info.exists) throw new AppError('err.noSignerAccount');
+  if (info.xlm < 0.5) throw new AppError('err.noXlm', { xlm: info.xlm });
+  const account = await soroban.getAccount(signer);
   const op = new Contract(CCTP_FORWARDER).call(
     'mint_and_forward',
     nativeToScVal(hexToBytes(msg.message), { type: 'bytes' }),
