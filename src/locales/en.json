@@ -13,7 +13,7 @@
   "step1.to": "Stellar recipient",
   "step1.toHint": "Connect the wallet that will receive the USDC. It must already hold a USDC trustline.",
   "step1.otherRecipient": "Send to another address",
-  "step1.noMemo": "CCTP carries no memo. Only use an address you control: USDC sent to an exchange deposit address will be lost.",
+  "step1.noMemo": "No memo: CCTP does not support it.",
   "step1.amount": "Amount, USDC",
   "step1.check": "Check",
   "step1.max": "Max",

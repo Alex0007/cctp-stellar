@@ -13,7 +13,7 @@
   "step1.to": "Получатель в Stellar",
   "step1.toHint": "Подключите кошелёк, который получит USDC. У него уже должен быть trustline к USDC.",
   "step1.otherRecipient": "Отправить на другой адрес",
-  "step1.noMemo": "CCTP не передаёт memo. Используйте только адрес, которым владеете сами: USDC, отправленные на депозитный адрес биржи, пропадут.",
+  "step1.noMemo": "Без memo: CCTP его не поддерживает.",
   "step1.amount": "Сумма, USDC",
   "step1.check": "Проверить",
   "step1.max": "Max",
