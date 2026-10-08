@@ -1,5 +1,5 @@
 :root{
-  --bg:#faf7f2; --surface:#fff; --text:#1c2b30; --muted:#5b6b70; --border:#d9d2c6; --border-strong:#1c2b30;
+  --bg:#f4f6f9; --surface:#fff; --text:#141a22; --muted:#5f6b7a; --border:#d6dce4; --border-strong:#141a22; --accent:#2775ca; --accent-strong:#1f5fa6;
   --ok:#2f7d4f; --err:#b3261e; --radius:10px;
 }
 *{ box-sizing:border-box; }
@@ -39,17 +39,18 @@ select.lang{ font:inherit; font-size:13px; color:var(--text); background:#fff; b
 .step[data-state="idle"] > :not(.resume) button, .step[data-state="idle"] > :not(.resume) input{ pointer-events:none; }
 .step[data-state="done"] .num{ background:var(--ok); }
 .step[data-state="error"] .num{ background:var(--err); }
-.num{ display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; border-radius:50%; background:var(--border-strong); color:#fff; font-size:13px; font-weight:600; }
+.num{ display:inline-flex; width:24px; height:24px; align-items:center; justify-content:center; border-radius:50%; background:var(--accent); color:#fff; font-size:13px; font-weight:600; }
 
 .field{ margin-top:12px; }
 label{ display:block; font-weight:600; margin-bottom:4px; }
 .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 .row > input{ flex:1 1 260px; }
 .row > input.short{ flex:0 1 200px; }
-input{ width:100%; height:38px; padding:0 10px; font:14px ui-monospace, SFMono-Regular, Menlo, monospace; border:1px solid var(--border); border-radius:6px; background:#fff; color:var(--text); }
+input{ width:100%; height:38px; padding:0 10px; font:14px ui-monospace, SFMono-Regular, Menlo, monospace; border:1px solid var(--border); outline:none; border-radius:6px; background:#fff; color:var(--text); }
 input.short{ max-width:200px; }
-input[readonly]{ background:#f6f3ee; }
-button{ display:inline-flex; align-items:center; gap:7px; height:38px; padding:0 14px; font:inherit; font-size:14px; font-weight:600; border:1px solid var(--border-strong); border-radius:6px; background:#fff; color:var(--text); cursor:pointer; }
+input[readonly]{ background:#f1f4f7; }
+input:focus{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(39,117,202,.18); }
+button{ display:inline-flex; align-items:center; gap:7px; height:38px; padding:0 14px; font:inherit; font-size:14px; font-weight:600; border:1px solid var(--border); border-radius:6px; background:#fff; color:var(--text); cursor:pointer; }
 .btn-icon{ width:16px; height:16px; border-radius:3px; flex:none; }
 button[hidden]{ display:none; }
 /* the wallet buttons next to an input share one column, so the inputs above
@@ -58,7 +59,9 @@ button[hidden]{ display:none; }
 .actions > button{ flex:1; min-width:0; padding:0 10px; justify-content:center; }
 .or{ font-size:13px; color:var(--muted); }
 @media (max-width:560px){ .actions{ flex-basis:100%; } }
-button.primary{ background:var(--border-strong); color:#fff; }
+button.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+button.primary:hover:not(:disabled){ background:var(--accent-strong); border-color:var(--accent-strong); }
+button:not(.primary):not(.link):hover:not(:disabled){ border-color:var(--border-strong); }
 button:disabled{ opacity:.45; cursor:default; }
 button.link{ display:inline; height:auto; border:0; background:none; padding:0 0 0 6px; font-weight:400; color:var(--muted); text-decoration:underline; text-underline-offset:3px; }
 .row > button.primary{ margin-top:12px; }
@@ -82,7 +85,7 @@ footer h2{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color
 .contract:first-child{ border-top:0; padding-top:0; }
 .chain{ grid-area:chain; justify-self:start; margin-top:2px; font-size:11px; font-weight:600; letter-spacing:.04em; padding:2px 7px; border-radius:999px; color:#fff; }
 .chain.polygon{ background:#7b3fe4; }
-.chain.stellar{ background:#1c2b30; }
+.chain.stellar{ background:#141a22; }
 .contract-name{ grid-area:name; color:var(--text); font-weight:600; }
 .contract-address{ grid-area:address; color:var(--muted); text-decoration:none; }
 .contract-address:hover{ color:var(--text); text-decoration:underline; text-underline-offset:3px; }
