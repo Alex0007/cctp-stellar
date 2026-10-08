@@ -238,8 +238,14 @@ export async function prepareMint({ msg, signer }: { msg: IrisMessage; signer: s
   );
   const tx = new TransactionBuilder(account, { fee: '1000000', networkPassphrase: Networks.PUBLIC }).addOperation(op).setTimeout(600).build();
   // prepareTransaction simulates the call; it throws if the mint would fail.
-  const ready = await soroban.prepareTransaction(tx);
-  return ready.toXDR();
+  try {
+    const ready = await soroban.prepareTransaction(tx);
+    return ready.toXDR();
+  } catch (e) {
+    // MessageTransmitterV2 error 6908, NonceAlreadyUsed: this message was minted before
+    if (String((e as Error)?.message ?? e).includes('6908')) throw new AppError('err.alreadyMinted');
+    throw e;
+  }
 }
 
 export async function submitSigned(signedXdr: string): Promise<string> {
