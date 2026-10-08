@@ -26,11 +26,13 @@ const messengerAbi = parseAbi([
   'function depositForBurnWithHook(uint256 amount, uint32 destinationDomain, bytes32 mintRecipient, address burnToken, bytes32 destinationCaller, uint256 maxFee, uint32 minFinalityThreshold, bytes hookData)',
 ]);
 
+export const POLYGON_RPC = 'https://polygon-bor-rpc.publicnode.com';
+
 export const publicClient = createPublicClient({
   chain: polygon,
   transport: fallback([
     http('https://polygon.drpc.org'),
-    http('https://polygon-bor-rpc.publicnode.com'),
+    http(POLYGON_RPC),
     http('https://1rpc.io/matic'),
   ]),
 });
