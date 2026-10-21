@@ -134,8 +134,9 @@ footer h2{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color
 .contracts-block .hint{ margin:0 0 4px; }
 .contracts-block .hint a{ color:var(--text); }
 /* one group per network under its own icon; a row is name, address (to the explorer), copy */
-.contract-chain{ display:flex; align-items:center; gap:7px; margin:14px 0 2px; font-size:13px; font-weight:600; color:var(--text); letter-spacing:0; text-transform:none; }
+.contract-chain{ display:flex; align-items:center; gap:7px; margin:22px 0 8px; font-size:13px; font-weight:600; color:var(--text); letter-spacing:0; text-transform:none; }
 .contract-chain img{ display:block; width:16px; height:16px; object-fit:contain; }
+.contract-group:first-child .contract-chain{ margin-top:14px; }
 .contract{ display:grid; grid-template-columns:170px minmax(0,1fr) 28px; column-gap:12px; align-items:center; padding:5px 0; border-top:1px solid var(--border); }
 .contract-name{ color:var(--text); }
 .contract-address{ color:var(--muted); text-decoration:none; min-width:0; }
