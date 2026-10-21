@@ -181,7 +181,10 @@ async function prepare() {
   state.prepared = null;
   showSign(false);
   // the button says what is going on, so a press during the wait is not a dead click
-  $('prepare').textContent = t('step3.waiting');
+  const spinner = document.createElement('span');
+  spinner.className = 'spinner';
+  $('prepare').replaceChildren(spinner, document.createTextNode(t('step3.waiting')));
+  $('prepare').classList.add('waiting');
   let built: NonNullable<State['prepared']>;
   try {
     const msg = await waitForAttestation(burnHash);
@@ -221,7 +224,7 @@ function showSign(on: boolean) {
     prepare.disabled = true;
   } else {
     prepare.textContent = t('step3.prepare');
-    prepare.classList.remove('done');
+    prepare.classList.remove('done', 'waiting');
     prepare.disabled = working; // busy() owns the buttons while something runs
     prepare.hidden = false;
   }
