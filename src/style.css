@@ -25,16 +25,18 @@ button.route-swap:hover:not(:disabled){ color:var(--text); }
    arrow, so the gap is the same on both sides whatever the names. Swapping slides each label into
    the other slot, one over the arrow and one under it */
 .route-pick{ display:inline-grid; grid-template-columns:1fr 16px 1fr; column-gap:10px; align-items:center; }
-.route-chip{ grid-row:1; font-weight:600; transition:translate .45s cubic-bezier(.65,0,.35,1); }
+.route-chip{ grid-row:1; font-weight:600; }
 .net-polygon{ grid-column:1; justify-self:end; }
 .net-stellar{ grid-column:3; justify-self:start; }
 .route-pick .route-arrow{ grid-column:2; grid-row:1; text-align:center; }
 /* the label's own width plus the arrow and both gaps: from hugging the arrow on one side to hugging it on the other */
 body[data-dir="reverse"] .net-polygon{ translate:calc(100% + 36px) 0; }
 body[data-dir="reverse"] .net-stellar{ translate:calc(-100% - 36px) 0; }
-/* the motion is set only after a click (body.swapping), so a page opened on #stellar-polygon does not play it.
+/* all the motion, the slide included, is set only after a click (body.swapping): a page opened on
+   #stellar-polygon, or one that resumes a reverse transfer, shows its direction without playing it.
    Always clockwise: the label heading right goes over the arrow, the one heading left under it;
    the button's icon turns clockwise with them, and the arrow steps aside while they cross */
+body.swapping .route-chip{ transition:translate .45s cubic-bezier(.65,0,.35,1); }
 body.swapping .net-polygon{ animation:arc-down-a .45s cubic-bezier(.65,0,.35,1); }
 body.swapping .net-stellar{ animation:arc-up-a .45s cubic-bezier(.65,0,.35,1); }
 body.swapping .route-pick .route-arrow{ animation:arrow-fade-a .45s ease; }
@@ -53,7 +55,7 @@ body.swapping[data-dir="reverse"] button.route-swap svg{ animation-name:spin-b; 
 @keyframes spin-a{ from{ transform:rotate(-180deg); } }
 @keyframes spin-b{ from{ transform:rotate(-180deg); } }
 @media (prefers-reduced-motion:reduce){
-  .route-chip{ transition:none; }
+  body.swapping .route-chip{ transition:none; }
   body.swapping .route-chip, body.swapping .route-pick .route-arrow, body.swapping button.route-swap svg{ animation:none; }
 }
 /* one direction on screen at a time: <body data-dir> picks it */

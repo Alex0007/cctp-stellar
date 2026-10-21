@@ -30,6 +30,8 @@
   <link rel="stylesheet" href="/src/style.css">
 </head>
 <body data-dir="forward">
+  <!-- a link to the reverse direction shows it from the first paint; main.ts confirms the choice later -->
+  <script>if (location.hash === '#stellar-polygon') document.body.dataset.dir = 'reverse';</script>
   <header class="top">
     <!-- the heading names the direction in words; the button beside it swaps it -->
     <div class="title">
