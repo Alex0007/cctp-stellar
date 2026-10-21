@@ -14,9 +14,11 @@ h2{ font-size:16px; margin:0 0 12px; display:flex; align-items:center; gap:10px;
 .route-sep{ width:1px; height:18px; background:var(--border); }
 .route-node, .route-chip{ display:inline-flex; align-items:center; gap:6px; }
 .route-node img, .route-chip img{ display:block; }
-/* the heading and its swap button: the button sits at the end of the words it changes */
-.title{ display:flex; align-items:center; gap:10px; min-width:0; }
-button.route-swap{ flex:none; width:30px; height:30px; padding:0; justify-content:center; border-radius:50%; color:var(--muted); }
+/* the heading and its swap button: the button flows right after the last word of the heading,
+   on its line when the heading wraps, shaped like the other small buttons (the language select) */
+.title{ min-width:0; }
+.title h1{ display:inline; }
+button.route-swap{ width:28px; height:28px; padding:0; margin-left:4px; justify-content:center; vertical-align:0; color:var(--muted); }
 button.route-swap:hover:not(:disabled){ color:var(--text); }
 /* the route: from → to as plain labels, nothing here is a control.
    Two equal slots (1fr each, as wide as the longer name) keep the arrow still; each label hugs the
