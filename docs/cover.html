@@ -6,7 +6,7 @@
   .wrap{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:44px; }
   .route{ display:flex; align-items:center; gap:36px; }
   .sep{ width:3px; height:110px; background:#c9d1db; border-radius:2px; }
-  .arrow{ width:80px; height:40px; }
+  .arrow{ width:80px; height:60px; }
   .title{ font-size:60px; font-weight:700; letter-spacing:-.02em; margin:0; }
   .sub{ font-size:26px; color:#5f6b7a; margin:0; }
   .domain{ position:absolute; right:56px; bottom:44px; font-size:24px; color:#5f6b7a; font-family:ui-monospace, Menlo, monospace; }
@@ -18,11 +18,12 @@
     <img src="../public/brand/usdc.svg" width="150" height="150">
     <div class="sep"></div>
     <img src="../public/brand/polygon.svg" width="134" height="120">
-    <svg class="arrow" viewBox="0 0 40 20" fill="none" stroke="#141a22" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h32M27 3l8 7-8 7"/></svg>
+    <!-- both ways: → over ← -->
+    <svg class="arrow" viewBox="0 0 40 30" fill="none" stroke="#141a22" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h32M28 2l7 6-7 6M37 22H5M12 16l-7 6 7 6"/></svg>
     <img src="../public/brand/stellar.svg" width="150" height="130">
   </div>
-  <h1 class="title">USDC from Polygon to Stellar</h1>
-  <p class="sub">Burn on Polygon, mint on Stellar 1:1. No added fees.</p>
+  <h1 class="title">USDC between Polygon and Stellar</h1>
+  <p class="sub">Both ways: burn on one network, mint on the other 1:1. No added fees.</p>
 </div>
 <div class="cctp">Circle CCTP V2</div>
 <div class="domain">usdc.eww.monster</div>

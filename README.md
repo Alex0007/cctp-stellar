@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/header-dark.svg">
-    <img src="docs/header.svg" width="300" height="64" alt="USDC, Polygon to Stellar">
+    <img src="docs/header.svg" width="300" height="64" alt="USDC between Polygon and Stellar">
   </picture>
 </p>
 
