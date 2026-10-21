@@ -75,7 +75,11 @@ function describe(e: unknown): string {
 }
 
 // a finished button (Prepare after the attestation) stays disabled
-const busy = (on: boolean) => document.querySelectorAll('button').forEach((b) => (b.disabled = on || b.classList.contains('done')));
+let working = false;
+const busy = (on: boolean) => {
+  working = on;
+  document.querySelectorAll('button').forEach((b) => (b.disabled = on || b.classList.contains('done')));
+};
 
 async function run(step: Step, fn: () => Promise<void>) {
   busy(true);
@@ -150,12 +154,18 @@ async function burn() {
 // ---- step 3: attestation, simulation, signature
 
 // Keeps polling through 404s and network hiccups; only gives up after an hour.
+// The status counts the minutes on every poll so the wait visibly goes on; the log gets a line a minute.
 async function waitForAttestation(burnHash: TxHash): Promise<IrisMessage> {
+  const started = Date.now();
   for (let i = 0; i < 360; i++) {
     try {
       const res = await cctp.fetchAttestation(burnHash);
       if (res.state === 'complete') return res.msg;
-      if (i % 6 === 0) status(3, res.state === 'not-indexed' ? 'status.waitingIndex' : 'status.waitingAttestation');
+      const sec = Math.round((Date.now() - started) / 1000);
+      const s: Status = { key: res.state === 'not-indexed' ? 'status.waitingIndex' : 'status.waitingAttestation', vars: { elapsed: `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}` }, kind: '' };
+      lastStatus[3] = s;
+      render(3, s);
+      if (i % 6 === 0) log(`[3] ${t(s.key, s.vars)}`);
     } catch (e) {
       log('attestation poll failed, retrying:', describe(e));
     }
@@ -170,12 +180,19 @@ async function prepare() {
   if (!state.signer || !state.signerWallet) throw new cctp.AppError('status.needSigner');
   state.prepared = null;
   showSign(false);
-  const msg = await waitForAttestation(burnHash);
-  const info = cctp.decodeBurnMessage(msg.message);
-  state.transfer = { amount: cctp.formatUsdc(info.amount), recipient: info.recipient };
-  status(3, 'status.attested', { amount: cctp.formatUsdc(info.amount), recipient: short(info.recipient) }, '', { href: cctp.links.stellarAccount(info.recipient), label: 'stellar.expert' });
-  const xdr = await cctp.prepareMint({ msg, signer: state.signer });
-  const built = { xdr, signer: state.signer, wallet: state.signerWallet };
+  // the button says what is going on, so a press during the wait is not a dead click
+  $('prepare').textContent = t('step3.waiting');
+  let built: NonNullable<State['prepared']>;
+  try {
+    const msg = await waitForAttestation(burnHash);
+    const info = cctp.decodeBurnMessage(msg.message);
+    state.transfer = { amount: cctp.formatUsdc(info.amount), recipient: info.recipient };
+    status(3, 'status.attested', { amount: cctp.formatUsdc(info.amount), recipient: short(info.recipient) }, '', { href: cctp.links.stellarAccount(info.recipient), label: 'stellar.expert' });
+    const xdr = await cctp.prepareMint({ msg, signer: state.signer });
+    built = { xdr, signer: state.signer, wallet: state.signerWallet };
+  } finally {
+    showSign(false); // back to plain Prepare if anything above failed
+  }
   state.prepared = built;
   showSign(true);
   status(3, 'status.prepared', {}, 'ok');
@@ -205,7 +222,8 @@ function showSign(on: boolean) {
   } else {
     prepare.textContent = t('step3.prepare');
     prepare.classList.remove('done');
-    prepare.disabled = false;
+    prepare.disabled = working; // busy() owns the buttons while something runs
+    prepare.hidden = false;
   }
   sign.hidden = !(on && p);
 }
@@ -255,6 +273,7 @@ function sign() {
     const tr = state.transfer;
     status(3, 'status.done', { amount: tr?.amount ?? '', recipient: short(tr?.recipient ?? '') }, 'done', { href: cctp.links.stellarTx(hash), label: 'stellar.expert' });
     setStep(3, 'done');
+    $('prepare').hidden = true; // nothing left to prepare for this burn; another hash brings it back
   });
 }
 
