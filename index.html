@@ -28,32 +28,45 @@
   <meta name="twitter:image" content="https://usdc.eww.monster/og.png">
   <link rel="stylesheet" href="/src/style.css">
 </head>
-<body>
+<body data-dir="forward">
   <header class="top">
-    <h1 data-i18n="title">USDC from Polygon to Stellar</h1>
+    <h1 class="fwd" data-i18n="title">USDC from Polygon to Stellar</h1>
+    <h1 class="rev" data-i18n="titleReverse">USDC from Stellar to Polygon</h1>
     <select id="lang" class="lang" aria-label="Language"></select>
   </header>
   <p class="route">
     <span class="route-node"><img src="/brand/usdc.svg" width="20" height="20" alt="">USDC</span>
     <span class="route-sep" aria-hidden="true"></span>
-    <span class="route-dir" tabindex="0" data-i18n-title="route.only">
-      <span class="route-node"><img src="/brand/polygon.svg" width="22" height="20" alt="">Polygon</span>
-      <span class="route-arrow" aria-hidden="true">→</span>
-      <span class="route-node"><img src="/brand/stellar.svg" width="20" height="20" alt="">Stellar</span>
+    <!-- the current route, from and to; the button between them swaps the networks.
+         One label per network, slid between the two slots: the heading already says the direction in words -->
+    <span class="route-pick">
+      <span class="route-chip net-polygon" aria-hidden="true"><img src="/brand/polygon.svg" width="22" height="20" alt="">Polygon</span>
+      <button type="button" class="route-swap" id="routeSwap" data-i18n-title="route.swap" data-i18n-aria="route.swap">
+        <!-- at rest an arrow, so the line reads "from → to"; under the cursor or keyboard focus it becomes swap -->
+        <svg class="icon-dir" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
+        <svg class="icon-swap" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10h14l-4-4"/><path d="M17 14H3l4 4"/></svg>
+      </button>
+      <span class="route-chip net-stellar" aria-hidden="true"><img src="/brand/stellar.svg" width="20" height="20" alt="">Stellar</span>
     </span>
-    <span class="route-note" data-i18n="route.only"></span>
   </p>
-  <p class="lede" data-i18n-html="lede"></p>
+  <p class="lede fwd" data-i18n-html="lede"></p>
+  <p class="lede rev" data-i18n-html="ledeReverse"></p>
   <details class="needs">
     <summary data-i18n="needs.title"></summary>
-    <ul>
+    <ul class="fwd">
       <li data-i18n-html="needs.usdc"></li>
       <li data-i18n-html="needs.trustline"></li>
       <li data-i18n-html="needs.xlm"></li>
     </ul>
+    <ul class="rev">
+      <li data-i18n-html="needsR.usdc"></li>
+      <li data-i18n-html="needsR.evm"></li>
+      <li data-i18n-html="needsR.pol"></li>
+    </ul>
   </details>
 
-  <section class="step" id="step1" data-state="active">
+  <!-- Polygon → Stellar: steps 1–3 -->
+  <section class="step fwd" id="step1" data-state="active">
     <h2><span class="num">1</span> <span data-i18n="step1.title"></span></h2>
     <div class="field">
       <label for="evm" data-i18n="step1.from"></label>
@@ -89,7 +102,7 @@
     <p class="status" id="status1"></p>
   </section>
 
-  <section class="step" id="step2" data-state="idle">
+  <section class="step fwd" id="step2" data-state="idle">
     <h2><span class="num">2</span> <span data-i18n="step2.title"></span></h2>
     <p data-i18n="step2.text"></p>
     <div class="row">
@@ -98,7 +111,7 @@
     <p class="status" id="status2"></p>
   </section>
 
-  <section class="step" id="step3" data-state="idle">
+  <section class="step fwd" id="step3" data-state="idle">
     <h2><span class="num">3</span> <span data-i18n="step3.title"></span></h2>
     <div class="field resume">
       <label for="burnTx" data-i18n="step3.burnTx"></label>
@@ -125,6 +138,66 @@
       <button type="button" id="sign" class="primary" hidden></button>
     </div>
     <p class="status" id="status3"></p>
+  </section>
+
+  <!-- Stellar → Polygon: steps 4–6 in the code, numbered 1–3 on the page -->
+  <section class="step rev" id="step4" data-state="active">
+    <h2><span class="num">1</span> <span data-i18n="step1.title"></span></h2>
+    <div class="field">
+      <label for="rSender" data-i18n="r1.from"></label>
+      <div class="row">
+        <input id="rSender" readonly placeholder="G…" autocomplete="off" spellcheck="false">
+        <span class="actions">
+          <button type="button" data-connect="sender" data-wallet="albedo"><img class="btn-icon" src="/brand/albedo.png" alt="">Albedo</button>
+          <span class="or" data-i18n="or"></span>
+          <button type="button" data-connect="sender" data-wallet="freighter"><img class="btn-icon" src="/brand/freighter.png" alt="">Freighter</button>
+        </span>
+      </div>
+    </div>
+    <div class="field">
+      <label for="rRecipient" data-i18n="r1.to"></label>
+      <div class="row">
+        <input id="rRecipient" readonly placeholder="0x…" autocomplete="off" spellcheck="false">
+        <span class="actions"><button type="button" id="rConnectEvm"><img class="btn-icon" src="/brand/metamask.svg" alt=""><span data-i18n="step1.connectMetaMask"></span></button></span>
+      </div>
+      <p class="hint"><span data-i18n="r1.toHint"></span> <button type="button" class="link" id="rOtherRecipient" data-i18n="step1.otherRecipient"></button></p>
+      <p class="hint" id="rRecipientWarning" hidden data-i18n="r1.noMemo"></p>
+    </div>
+    <div class="field">
+      <label for="rAmount" data-i18n="step1.amount"></label>
+      <div class="row">
+        <input id="rAmount" inputmode="decimal" autocomplete="off" class="short">
+        <button type="button" id="rMax" data-i18n="step1.max"></button>
+      </div>
+      <p class="hint" data-i18n="r1.amountHint"></p>
+    </div>
+    <div class="row">
+      <button type="button" id="rCheck" class="primary" data-i18n="step1.check"></button>
+    </div>
+    <p class="status" id="status4"></p>
+  </section>
+
+  <section class="step rev" id="step5" data-state="idle">
+    <h2><span class="num">2</span> <span data-i18n="r2.title"></span></h2>
+    <p data-i18n="r2.text"></p>
+    <div class="row">
+      <button type="button" id="rBurn" class="primary" data-i18n="r2.burn"></button>
+    </div>
+    <p class="status" id="status5"></p>
+  </section>
+
+  <section class="step rev" id="step6" data-state="idle">
+    <h2><span class="num">3</span> <span data-i18n="r3.title"></span></h2>
+    <div class="field resume">
+      <label for="rBurnTx" data-i18n="r3.burnTx"></label>
+      <input id="rBurnTx" placeholder="5e1c…" autocomplete="off" spellcheck="false">
+      <p class="hint" data-i18n="r3.resume"></p>
+    </div>
+    <div class="row">
+      <button type="button" id="rPrepare" class="primary" data-i18n="step3.prepare"></button>
+      <button type="button" id="rReceive" class="primary" hidden><img class="btn-icon" src="/brand/metamask.svg" alt=""><span data-i18n="r3.receive"></span></button>
+    </div>
+    <p class="status" id="status6"></p>
   </section>
 
   <details class="log">

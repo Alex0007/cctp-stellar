@@ -12,13 +12,48 @@ h2{ font-size:16px; margin:0 0 12px; display:flex; align-items:center; gap:10px;
 .lede a{ color:inherit; text-underline-offset:3px; }
 .route{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:14px auto 0; font-size:14px; color:var(--text); }
 .route-sep{ width:1px; height:18px; background:var(--border); }
-.route-dir{ display:inline-flex; align-items:center; gap:8px; cursor:default; outline:none; }
-.route-node{ display:inline-flex; align-items:center; gap:6px; }
-.route-node img{ display:block; }
-.route-arrow{ color:var(--muted); }
-/* the note appears only when someone goes for the direction: hover, keyboard focus or a tap */
-.route-note{ font-size:13px; color:var(--muted); visibility:hidden; }
-.route-dir:hover + .route-note, .route-dir:focus + .route-note{ visibility:visible; }
+.route-node, .route-chip{ display:inline-flex; align-items:center; gap:6px; }
+.route-node img, .route-chip img{ display:block; }
+/* the route: from and to as plain labels (they are not controls), the round swap button between them.
+   Two equal slots (1fr each, as wide as the longer name) keep the button still; each label hugs the
+   button, so the gap is the same on both sides whatever the names. Swapping slides each label into
+   the other slot, one over the button and one under it */
+.route-pick{ display:inline-grid; grid-template-columns:1fr 32px 1fr; column-gap:10px; align-items:center; }
+.route-chip{ grid-row:1; font-weight:600; transition:translate .45s cubic-bezier(.65,0,.35,1); }
+.net-polygon{ grid-column:1; justify-self:end; }
+.net-stellar{ grid-column:3; justify-self:start; }
+/* the label's own width plus the button and both gaps: from hugging the button on one side to hugging it on the other */
+body[data-dir="reverse"] .net-polygon{ translate:calc(100% + 52px) 0; }
+body[data-dir="reverse"] .net-stellar{ translate:calc(-100% - 52px) 0; }
+/* the arc: set only after a click, so a page opened on #stellar-polygon does not play it */
+/* always clockwise: the label heading right goes over the button, the one heading left under it */
+.route-pick.swapping .net-polygon{ animation:arc-down-a .45s cubic-bezier(.65,0,.35,1); }
+.route-pick.swapping .net-stellar{ animation:arc-up-a .45s cubic-bezier(.65,0,.35,1); }
+body[data-dir="reverse"] .route-pick.swapping .net-polygon{ animation-name:arc-up-b; }
+body[data-dir="reverse"] .route-pick.swapping .net-stellar{ animation-name:arc-down-b; }
+/* a and b are the same curve under two names: a new name restarts it on every swap */
+@keyframes arc-up-a{ 50%{ transform:translateY(-9px) scale(1.06); } }
+@keyframes arc-up-b{ 50%{ transform:translateY(-9px) scale(1.06); } }
+@keyframes arc-down-a{ 50%{ transform:translateY(9px) scale(.94); opacity:.55; } }
+@keyframes arc-down-b{ 50%{ transform:translateY(9px) scale(.94); opacity:.55; } }
+button.route-swap{ grid-column:2; grid-row:1; position:relative; z-index:1; width:32px; height:32px; padding:0; justify-content:center; border-radius:50%; color:var(--muted); }
+button.route-swap:hover:not(:disabled){ color:var(--text); }
+/* the two icons share one spot and cross-fade; the arrow always points right, the networks move instead */
+button.route-swap svg{ position:absolute; transition:opacity .15s, transform .15s; }
+button.route-swap .icon-swap{ opacity:0; transform:scale(.7); }
+button.route-swap:focus-visible .icon-dir{ opacity:0; transform:scale(.7); }
+button.route-swap:focus-visible .icon-swap{ opacity:1; transform:none; }
+/* only where hover is real: on a touch screen it sticks after the tap and would hide the arrow */
+@media (hover:hover){
+  button.route-swap:hover .icon-dir{ opacity:0; transform:scale(.7); }
+  button.route-swap:hover .icon-swap{ opacity:1; transform:none; }
+}
+@media (prefers-reduced-motion:reduce){
+  .route-chip, button.route-swap svg{ transition:none; }
+  .route-pick.swapping .route-chip{ animation:none; }
+}
+/* one direction on screen at a time: <body data-dir> picks it */
+body[data-dir="forward"] .rev, body[data-dir="reverse"] .fwd{ display:none; }
 select.lang{ font:inherit; font-size:13px; color:var(--text); background:#fff; border:1px solid var(--border); border-radius:6px; padding:5px 8px; }
 
 .needs{ margin:0 auto 6px; padding:10px 18px; border:1px dashed var(--border); border-radius:var(--radius); font-size:14px; }
