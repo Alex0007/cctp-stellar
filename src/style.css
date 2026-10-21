@@ -131,17 +131,25 @@ button.link{ display:inline; height:auto; border:0; background:none; padding:0 0
 footer{ margin-top:40px; font-size:13px; color:var(--muted); }
 .contracts-block{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 20px; }
 footer h2{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
-.contracts{ display:flex; flex-direction:column; }
-.contract{ display:grid; grid-template-columns:72px 1fr; grid-template-areas:"chain name" "chain address"; column-gap:12px; row-gap:2px; align-items:start; padding:8px 0; border-top:1px solid var(--border); }
-.contract:first-child{ border-top:0; padding-top:0; }
-.chain{ grid-area:chain; justify-self:start; margin-top:2px; font-size:11px; font-weight:600; letter-spacing:.04em; padding:2px 7px; border-radius:999px; color:#fff; }
-.chain.polygon{ background:#7b3fe4; }
-.chain.stellar{ background:#141a22; }
-.contract-name{ grid-area:name; color:var(--text); font-weight:600; }
-.contract-address{ grid-area:address; color:var(--muted); text-decoration:none; }
+.contracts-block .hint{ margin:0 0 4px; }
+.contracts-block .hint a{ color:var(--text); }
+/* one group per network under its own icon; a row is name, address (to the explorer), copy */
+.contract-chain{ display:flex; align-items:center; gap:7px; margin:14px 0 2px; font-size:13px; font-weight:600; color:var(--text); letter-spacing:0; text-transform:none; }
+.contract-chain img{ display:block; width:16px; height:16px; object-fit:contain; }
+.contract{ display:grid; grid-template-columns:170px minmax(0,1fr) 28px; column-gap:12px; align-items:center; padding:5px 0; border-top:1px solid var(--border); }
+.contract-name{ color:var(--text); }
+.contract-address{ color:var(--muted); text-decoration:none; min-width:0; }
 .contract-address:hover{ color:var(--text); text-decoration:underline; text-underline-offset:3px; }
 .contract-address code{ font:12px ui-monospace, Menlo, monospace; word-break:break-all; }
-.contracts-block .hint a{ color:var(--text); }
-.footer-links{ display:flex; flex-wrap:wrap; gap:6px 18px; margin-top:16px; padding:0 4px; }
-.footer-links a{ color:var(--muted); text-decoration:none; }
+button.copy{ width:28px; height:28px; padding:0; justify-content:center; border-color:transparent; background:none; color:var(--muted); }
+button.copy:hover:not(:disabled){ color:var(--text); border-color:var(--border); }
+button.copy.copied{ color:var(--ok); }
+@media (max-width:560px){
+  .contract{ grid-template-columns:minmax(0,1fr) 28px; row-gap:2px; }
+  .contract-name{ grid-column:1 / -1; }
+}
+.footer-links{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 20px; margin-top:16px; padding:0 4px; }
+.footer-links a{ display:inline-flex; align-items:center; gap:7px; color:var(--muted); text-decoration:none; }
 .footer-links a:hover{ color:var(--text); text-decoration:underline; text-underline-offset:3px; }
+.footer-links img, .footer-links svg{ display:block; width:18px; height:18px; flex:none; }
+.footer-links img{ border-radius:50%; }

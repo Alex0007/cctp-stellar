@@ -594,26 +594,64 @@ $('sign').onclick = sign;
 
 // ---- footer, language, resume
 
-const contracts: { key: string; chain: 'polygon' | 'stellar'; address: string; link: (a: string) => string }[] = [
-  { key: 'contracts.usdc', chain: 'polygon', address: cctp.POLYGON_USDC, link: cctp.links.polygonAddress },
-  { key: 'contracts.messenger', chain: 'polygon', address: cctp.TOKEN_MESSENGER_V2, link: cctp.links.polygonAddress },
-  { key: 'contracts.transmitter', chain: 'polygon', address: cctp.MESSAGE_TRANSMITTER_V2, link: cctp.links.polygonAddress },
-  { key: 'contracts.forwarder', chain: 'stellar', address: cctp.CCTP_FORWARDER, link: cctp.links.stellarContract },
-  { key: 'contracts.minter', chain: 'stellar', address: cctp.TOKEN_MESSENGER_MINTER, link: cctp.links.stellarContract },
-  { key: 'contracts.stellarUsdc', chain: 'stellar', address: `USDC-${cctp.STELLAR_USDC_ISSUER}`, link: () => cctp.links.stellarAsset('USDC', cctp.STELLAR_USDC_ISSUER) },
-  { key: 'contracts.issuer', chain: 'stellar', address: cctp.STELLAR_USDC_ISSUER, link: cctp.links.stellarAccount },
+// Grouped by network, so a name needs no "on Polygon" of its own. USDC and its issuer lead each group.
+const contracts: { chain: 'polygon' | 'stellar'; icon: string; items: { name: string; address: string; link: string }[] }[] = [
+  {
+    chain: 'polygon',
+    icon: '/brand/polygon.svg',
+    items: [
+      { name: 'USDC', address: cctp.POLYGON_USDC, link: cctp.links.polygonAddress(cctp.POLYGON_USDC) },
+      { name: 'TokenMessengerV2', address: cctp.TOKEN_MESSENGER_V2, link: cctp.links.polygonAddress(cctp.TOKEN_MESSENGER_V2) },
+      { name: 'MessageTransmitterV2', address: cctp.MESSAGE_TRANSMITTER_V2, link: cctp.links.polygonAddress(cctp.MESSAGE_TRANSMITTER_V2) },
+    ],
+  },
+  {
+    chain: 'stellar',
+    icon: '/brand/stellar.svg',
+    items: [
+      { name: 'USDC', address: cctp.STELLAR_USDC, link: cctp.links.stellarContract(cctp.STELLAR_USDC) },
+      { name: 'contracts.issuer', address: cctp.STELLAR_USDC_ISSUER, link: cctp.links.stellarAccount(cctp.STELLAR_USDC_ISSUER) },
+      { name: 'TokenMessengerMinter', address: cctp.TOKEN_MESSENGER_MINTER, link: cctp.links.stellarContract(cctp.TOKEN_MESSENGER_MINTER) },
+      { name: 'CctpForwarder', address: cctp.CCTP_FORWARDER, link: cctp.links.stellarContract(cctp.CCTP_FORWARDER) },
+    ],
+  },
 ];
+const COPY_ICON = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>';
+const COPIED_ICON = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
 function renderContracts() {
   $('contracts').innerHTML = contracts
     .map(
-      (c) => `<div class="contract">
-        <span class="chain ${c.chain}">${t('chain.' + c.chain)}</span>
-        <span class="contract-name">${t(c.key)}</span>
-        <a class="contract-address" href="${c.link(c.address)}" target="_blank" rel="noopener" title="${c.address}"><code>${c.address}</code></a>
+      (g) => `<div class="contract-group">
+        <h3 class="contract-chain"><img src="${g.icon}" width="16" height="16" alt="">${t('chain.' + g.chain)}</h3>
+        ${g.items
+          .map(
+            (c) => `<div class="contract">
+              <span class="contract-name">${c.name.startsWith('contracts.') ? t(c.name) : c.name}</span>
+              <a class="contract-address" href="${c.link}" target="_blank" rel="noopener"><code>${c.address}</code></a>
+              <button type="button" class="copy" data-copy="${c.address}" title="${t('contracts.copy')}" aria-label="${t('contracts.copy')}">${COPY_ICON}</button>
+            </div>`,
+          )
+          .join('')}
       </div>`,
     )
     .join('');
 }
+// one listener for every copy button; the icon turns into a check for a moment
+$('contracts').addEventListener('click', async (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button.copy');
+  if (!b) return;
+  try {
+    await navigator.clipboard.writeText(b.dataset.copy!);
+  } catch {
+    return; // no clipboard access (an old browser, an insecure page): the address stays selectable
+  }
+  b.innerHTML = COPIED_ICON;
+  b.classList.add('copied');
+  setTimeout(() => {
+    b.innerHTML = COPY_ICON;
+    b.classList.remove('copied');
+  }, 1500);
+});
 
 const langSelect = $<HTMLSelectElement>('lang');
 langSelect.innerHTML = languages.map((l) => `<option value="${l}">${languageNames[l] ?? l}</option>`).join('');
