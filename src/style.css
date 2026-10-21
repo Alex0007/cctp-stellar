@@ -12,13 +12,52 @@ h2{ font-size:16px; margin:0 0 12px; display:flex; align-items:center; gap:10px;
 .lede a{ color:inherit; text-underline-offset:3px; }
 .route{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:14px auto 0; font-size:14px; color:var(--text); }
 .route-sep{ width:1px; height:18px; background:var(--border); }
-.route-dir{ display:inline-flex; align-items:center; gap:8px; cursor:default; outline:none; }
-.route-node{ display:inline-flex; align-items:center; gap:6px; }
-.route-node img{ display:block; }
-.route-arrow{ color:var(--muted); }
-/* the note appears only when someone goes for the direction: hover, keyboard focus or a tap */
-.route-note{ font-size:13px; color:var(--muted); visibility:hidden; }
-.route-dir:hover + .route-note, .route-dir:focus + .route-note{ visibility:visible; }
+.route-node, .route-chip{ display:inline-flex; align-items:center; gap:6px; }
+.route-node img, .route-chip img{ display:block; }
+/* the heading and its swap button: the button flows right after the last word of the heading,
+   on its line when the heading wraps, shaped like the other small buttons (the language select) */
+.title{ min-width:0; }
+.title h1{ display:inline; }
+button.route-swap{ width:28px; height:28px; padding:0; margin-left:4px; justify-content:center; vertical-align:0; color:var(--muted); }
+button.route-swap:hover:not(:disabled){ color:var(--text); }
+/* the route: from → to as plain labels, nothing here is a control.
+   Two equal slots (1fr each, as wide as the longer name) keep the arrow still; each label hugs the
+   arrow, so the gap is the same on both sides whatever the names. Swapping slides each label into
+   the other slot, one over the arrow and one under it */
+.route-pick{ display:inline-grid; grid-template-columns:1fr 16px 1fr; column-gap:10px; align-items:center; }
+.route-chip{ grid-row:1; font-weight:600; transition:translate .45s cubic-bezier(.65,0,.35,1); }
+.net-polygon{ grid-column:1; justify-self:end; }
+.net-stellar{ grid-column:3; justify-self:start; }
+.route-pick .route-arrow{ grid-column:2; grid-row:1; text-align:center; }
+/* the label's own width plus the arrow and both gaps: from hugging the arrow on one side to hugging it on the other */
+body[data-dir="reverse"] .net-polygon{ translate:calc(100% + 36px) 0; }
+body[data-dir="reverse"] .net-stellar{ translate:calc(-100% - 36px) 0; }
+/* the motion is set only after a click (body.swapping), so a page opened on #stellar-polygon does not play it.
+   Always clockwise: the label heading right goes over the arrow, the one heading left under it;
+   the button's icon turns clockwise with them, and the arrow steps aside while they cross */
+body.swapping .net-polygon{ animation:arc-down-a .45s cubic-bezier(.65,0,.35,1); }
+body.swapping .net-stellar{ animation:arc-up-a .45s cubic-bezier(.65,0,.35,1); }
+body.swapping .route-pick .route-arrow{ animation:arrow-fade-a .45s ease; }
+body.swapping button.route-swap svg{ animation:spin-a .45s cubic-bezier(.65,0,.35,1); }
+body.swapping[data-dir="reverse"] .net-polygon{ animation-name:arc-up-b; }
+body.swapping[data-dir="reverse"] .net-stellar{ animation-name:arc-down-b; }
+body.swapping[data-dir="reverse"] .route-pick .route-arrow{ animation-name:arrow-fade-b; }
+body.swapping[data-dir="reverse"] button.route-swap svg{ animation-name:spin-b; }
+/* a and b are the same motion under two names: a new name restarts it on every swap */
+@keyframes arc-up-a{ 50%{ transform:translateY(-9px) scale(1.06); } }
+@keyframes arc-up-b{ 50%{ transform:translateY(-9px) scale(1.06); } }
+@keyframes arc-down-a{ 50%{ transform:translateY(9px) scale(.94); opacity:.55; } }
+@keyframes arc-down-b{ 50%{ transform:translateY(9px) scale(.94); opacity:.55; } }
+@keyframes arrow-fade-a{ 30%, 70%{ opacity:0; } }
+@keyframes arrow-fade-b{ 30%, 70%{ opacity:0; } }
+@keyframes spin-a{ from{ transform:rotate(-180deg); } }
+@keyframes spin-b{ from{ transform:rotate(-180deg); } }
+@media (prefers-reduced-motion:reduce){
+  .route-chip{ transition:none; }
+  body.swapping .route-chip, body.swapping .route-pick .route-arrow, body.swapping button.route-swap svg{ animation:none; }
+}
+/* one direction on screen at a time: <body data-dir> picks it */
+body[data-dir="forward"] .rev, body[data-dir="reverse"] .fwd{ display:none; }
 select.lang{ font:inherit; font-size:13px; color:var(--text); background:#fff; border:1px solid var(--border); border-radius:6px; padding:5px 8px; }
 
 .needs{ margin:0 auto 6px; padding:10px 18px; border:1px dashed var(--border); border-radius:var(--radius); font-size:14px; }

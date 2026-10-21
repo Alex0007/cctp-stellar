@@ -5,7 +5,9 @@ import { connectMetaMask, polygonWallet } from './wallets/evm';
 import { stellarWallets, type StellarWalletId } from './wallets/stellar';
 import { apply, languageNames, languages, onLangChange, setLang, t } from './i18n';
 
-type Step = 1 | 2 | 3;
+// 1–3: Polygon → Stellar; 4–6: Stellar → Polygon, shown on the page as 1–3
+type Step = 1 | 2 | 3 | 4 | 5 | 6;
+type Direction = 'forward' | 'reverse';
 type StepState = 'idle' | 'active' | 'done' | 'error';
 type Vars = Record<string, string | number>;
 interface StatusLink { href: string; label: string }
@@ -37,6 +39,7 @@ const state: State = {
   transfer: null,
 };
 const TX_LIFETIME_MS = 10 * 60 * 1000; // setTimeout(600) in prepareMint
+const NOT_A_BURN_AFTER_MS = 15 * 60 * 1000;
 const lastStatus: Partial<Record<Step, Status | null>> = {}; // re-rendered on language change
 
 function log(...a: unknown[]) {
@@ -154,22 +157,41 @@ async function burn() {
 // ---- step 3: attestation, simulation, signature
 
 // Keeps polling through 404s and network hiccups; only gives up after an hour.
-// The status counts the minutes on every poll so the wait visibly goes on; the log gets a line a minute.
-async function waitForAttestation(burnHash: TxHash): Promise<IrisMessage> {
+// The status shows up at once and its clock ticks every second, apart from the polls, so the wait
+// visibly goes on; a poll only switches the text once Circle sees the burn. The log gets a line a minute.
+async function waitForAttestation(burnHash: string, step: Step = 3, sourceDomain = cctp.POLYGON_DOMAIN): Promise<IrisMessage> {
   const started = Date.now();
-  for (let i = 0; i < 360; i++) {
-    try {
-      const res = await cctp.fetchAttestation(burnHash);
-      if (res.state === 'complete') return res.msg;
-      const sec = Math.round((Date.now() - started) / 1000);
-      const s: Status = { key: res.state === 'not-indexed' ? 'status.waitingIndex' : 'status.waitingAttestation', vars: { elapsed: `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}` }, kind: '' };
-      lastStatus[3] = s;
-      render(3, s);
-      if (i % 6 === 0) log(`[3] ${t(s.key, s.vars)}`);
-    } catch (e) {
-      log('attestation poll failed, retrying:', describe(e));
+  let key = 'status.waitingIndex';
+  const tick = (): Status => {
+    const sec = Math.floor((Date.now() - started) / 1000);
+    const s: Status = { key, vars: { elapsed: `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}` }, kind: '' };
+    lastStatus[step] = s;
+    render(step, s);
+    return s;
+  };
+  tick();
+  const clock = setInterval(tick, 1000);
+  try {
+    // a mistyped or foreign hash fails here at once instead of an hour of polling
+    const landed = await cctp.burnTxTime(burnHash, sourceDomain);
+    for (let i = 0; i < 360; i++) {
+      try {
+        const res = await cctp.fetchAttestation(burnHash, sourceDomain);
+        if (res.state === 'complete') return res.msg;
+        // Circle lists a burn within minutes of its block, long before the attestation;
+        // still unknown a quarter of an hour later, the transaction burned nothing through CCTP
+        if (res.state === 'not-indexed' && Date.now() - landed > NOT_A_BURN_AFTER_MS) throw new cctp.AppError('err.notABurn');
+        key = res.state === 'not-indexed' ? 'status.waitingIndex' : 'status.waitingAttestation';
+        const s = tick();
+        if (i % 6 === 0) log(`[${step}] ${t(s.key, s.vars)}`);
+      } catch (e) {
+        if (e instanceof cctp.AppError && e.key === 'err.notABurn') throw e;
+        log('attestation poll failed, retrying:', describe(e));
+      }
+      await sleep(10_000);
     }
-    await sleep(10_000);
+  } finally {
+    clearInterval(clock); // whatever ends the wait, the clock must not paint over the next status
   }
   throw new cctp.AppError('err.attestationTimeout');
 }
@@ -180,11 +202,7 @@ async function prepare() {
   if (!state.signer || !state.signerWallet) throw new cctp.AppError('status.needSigner');
   state.prepared = null;
   showSign(false);
-  // the button says what is going on, so a press during the wait is not a dead click
-  const spinner = document.createElement('span');
-  spinner.className = 'spinner';
-  $('prepare').replaceChildren(spinner, document.createTextNode(t('step3.waiting')));
-  $('prepare').classList.add('waiting');
+  showWaiting($('prepare'));
   let built: NonNullable<State['prepared']>;
   try {
     const msg = await waitForAttestation(burnHash);
@@ -229,6 +247,14 @@ function showSign(on: boolean) {
     prepare.hidden = false;
   }
   sign.hidden = !(on && p);
+}
+
+// the button says what is going on, so a press during the wait is not a dead click
+function showWaiting(button: HTMLElement) {
+  const spinner = document.createElement('span');
+  spinner.className = 'spinner';
+  button.replaceChildren(spinner, document.createTextNode(t('step3.waiting')));
+  button.classList.add('waiting');
 }
 
 function icon(src: string): HTMLImageElement {
@@ -280,10 +306,227 @@ function sign() {
   });
 }
 
+// ---- Stellar → Polygon (steps 4–6)
+
+interface Reverse {
+  sender: string;
+  wallet: StellarWalletId | null;
+  evm: EvmAddress | ''; // the connected MetaMask account, the recipient unless another address was typed
+  recipient: EvmAddress | '';
+  amount: bigint;
+  maxFee: bigint; // Circle's fee in 7-decimal units, the burn's max_fee
+  tx: (cctp.ReverseTx & { built: number }) | null; // approve or burn, built and simulated, signed by the step 2 button
+  msg: IrisMessage | null; // attested and simulated on Polygon, ready for Receive
+  transfer: { amount: string; recipient: string } | null;
+}
+const rev: Reverse = { sender: '', wallet: null, evm: '', recipient: '', amount: 0n, maxFee: 0n, tx: null, msg: null, transfer: null };
+const STELLAR_BURN_KEY = 'cctp:lastBurnTx:stellar';
+
+function readReverseInputs(): cctp.ReverseInputs {
+  const sender = input('rSender').value.trim();
+  const recipient = input('rRecipient').value.trim();
+  if (!cctp.isStellarAddress(sender) || !rev.wallet) throw new cctp.AppError('err.sender');
+  if (!cctp.isEvmAddress(recipient)) throw new cctp.AppError('err.evmRecipient');
+  const amount = cctp.parseAmount(input('rAmount').value.trim());
+  return { sender, recipient, amount, relayer: rev.evm || undefined };
+}
+
+// Any edit to the inputs throws the built transaction away: it would burn the old amount for the old recipient.
+function dropBurn() {
+  rev.tx = null;
+  if ($('step4').dataset.state === 'done') {
+    setStep(4, 'active');
+    setStep(5, 'idle');
+  }
+}
+
+async function checkReverse() {
+  setStep(5, 'idle');
+  rev.tx = null;
+  const inputs = readReverseInputs();
+  status(4, 'status.checking');
+  const { fee, tx } = await cctp.checkReverse(inputs);
+  Object.assign(rev, { amount: inputs.amount, recipient: inputs.recipient, maxFee: fee, tx: { ...tx, built: Date.now() } });
+  status(4, 'status.checked', { amount: cctp.formatUsdc(inputs.amount), evm: short(inputs.sender), recipient: short(inputs.recipient), fee: cctp.formatUsdc(fee / 10n) }, 'ok');
+  setStep(4, 'done');
+  setStep(5, 'active');
+  renderBurnButton();
+  status(5, tx.kind === 'approve' ? 'status.rReadyApprove' : 'status.rReady', { amount: cctp.formatUsdc(inputs.amount), recipient: inputs.recipient });
+}
+
+// One button, two jobs: Approve in <wallet> while the allowance is missing, then Burn in <wallet>.
+function renderBurnButton() {
+  const b = $('rBurn');
+  const key = rev.tx?.kind === 'approve' ? 'r2.approveIn' : 'r2.burnIn';
+  if (rev.wallet) b.replaceChildren(icon(`/brand/${rev.wallet}.png`), document.createTextNode(t(key, { wallet: stellarWallets[rev.wallet].name })));
+  else b.textContent = t('r2.burn');
+}
+
+function burnOnStellar() {
+  const tx = rev.tx;
+  if (!tx || !rev.wallet) return;
+  if (Date.now() - tx.built > TX_LIFETIME_MS) {
+    rev.tx = null;
+    setStep(5, 'error');
+    status(5, 'status.rExpired', {}, 'err');
+    setStep(4, 'active');
+    return;
+  }
+  const walletName = stellarWallets[rev.wallet].name;
+  // No await before this call: the wallet popup must open straight from the click.
+  const signing = stellarWallets[rev.wallet].sign(tx.xdr, rev.sender);
+  run(5, async () => {
+    status(5, tx.kind === 'approve' ? 'status.rSigningApprove' : 'status.rSigning', { wallet: walletName });
+    const signed = await signing; // a declined signature leaves the built transaction usable
+    const hash = await cctp.submitSigned(signed).catch((e) => {
+      rev.tx = null; // rejected by the network (expired, bad sequence): Check builds it again
+      setStep(4, 'active');
+      throw e;
+    });
+    rev.tx = null;
+    if (tx.kind === 'approve') {
+      status(5, 'status.rApproveSent', { hash: short(hash) }, '', { href: cctp.links.stellarTx(hash), label: 'stellar.expert' });
+      await cctp.waitForStellarTx(hash);
+      // the burn can only be simulated once the allowance exists; its signature needs a click of its own
+      const xdr = await cctp.prepareBurn({ sender: rev.sender, recipient: rev.recipient as EvmAddress, amount: rev.amount }, rev.maxFee);
+      rev.tx = { kind: 'burn', xdr, built: Date.now() };
+      renderBurnButton();
+      status(5, 'status.rApproved', { wallet: walletName }, 'ok', { href: cctp.links.stellarTx(hash), label: 'stellar.expert' });
+      return;
+    }
+    input('rBurnTx').value = hash;
+    localStorage.setItem(STELLAR_BURN_KEY, hash);
+    status(5, 'status.rSent', { hash: short(hash) }, '', { href: cctp.links.stellarTx(hash), label: 'stellar.expert' });
+    await cctp.waitForStellarTx(hash);
+    status(5, 'status.rConfirmed', {}, 'ok', { href: cctp.links.stellarTx(hash), label: 'stellar.expert' });
+    setStep(5, 'done');
+    setStep(6, 'active');
+    log('burn:', hash);
+    await prepareReceive();
+  });
+}
+
+async function prepareReceive() {
+  const burnHash = input('rBurnTx').value.trim().replace(/^0x/, '').toLowerCase();
+  if (!cctp.isStellarTxHash(burnHash)) throw new cctp.AppError('err.rBurnTx');
+  rev.msg = null;
+  showReceive(false);
+  showWaiting($('rPrepare'));
+  try {
+    const msg = await waitForAttestation(burnHash, 6, cctp.STELLAR_DOMAIN);
+    // simulated from the connected account if there is one, otherwise from the recipient: anyone may relay
+    const info = cctp.decodeBurnToEvm(msg.message);
+    rev.transfer = { amount: cctp.formatUsdc(info.amount), recipient: info.recipient };
+    status(6, 'status.attested', { amount: rev.transfer.amount, recipient: short(info.recipient) }, '', { href: cctp.links.polygonAddress(info.recipient), label: 'polygonscan' });
+    await cctp.checkReceive(msg, rev.evm || info.recipient);
+    rev.msg = msg;
+  } finally {
+    showReceive(Boolean(rev.msg));
+  }
+  status(6, 'status.rPrepared', {}, 'ok');
+}
+
+// Same hand-over as in step 3: Prepare turns into a finished "Attestation received", Receive in MetaMask appears beside it.
+function showReceive(on: boolean) {
+  const prepare = $('rPrepare') as HTMLButtonElement;
+  if (on) {
+    prepare.replaceChildren(checkIcon(), document.createTextNode(t('step3.prepared')));
+    prepare.classList.add('done');
+    prepare.disabled = true;
+  } else {
+    prepare.textContent = t('step3.prepare');
+    prepare.classList.remove('done', 'waiting');
+    prepare.disabled = working;
+    prepare.hidden = false;
+  }
+  $('rReceive').hidden = !on;
+}
+
+function receive() {
+  const msg = rev.msg;
+  if (!msg) return;
+  run(6, async () => {
+    const evm = rev.evm || (await connectReverseEvm());
+    if ((await cctp.gasBalance(evm)) === 0n) throw new cctp.AppError('err.noGasRelayer');
+    const wallet = await polygonWallet(evm);
+    status(6, 'status.rReceiving');
+    const hash = await cctp.receiveOnPolygon(wallet, msg, (h) => {
+      rev.msg = null;
+      showReceive(false);
+      status(6, 'status.rReceiveSent', { hash: short(h) }, '', { href: cctp.links.polygonTx(h), label: 'polygonscan' });
+    });
+    localStorage.removeItem(STELLAR_BURN_KEY);
+    const tr = rev.transfer;
+    status(6, 'status.done', { amount: tr?.amount ?? '', recipient: short(tr?.recipient ?? '') }, 'done', { href: cctp.links.polygonTx(hash), label: 'polygonscan' });
+    setStep(6, 'done');
+    $('rPrepare').hidden = true;
+  });
+}
+
+async function connectReverseEvm(): Promise<EvmAddress> {
+  const address = await connectMetaMask();
+  rev.evm = address;
+  // MetaMask fills the recipient unless another address was typed in
+  if (input('rRecipient').readOnly) input('rRecipient').value = address;
+  log('MetaMask:', address);
+  return address;
+}
+
+$('rConnectEvm').onclick = () => run(4, async () => { await connectReverseEvm(); dropBurn(); });
+$('rOtherRecipient').onclick = () => {
+  const field = input('rRecipient');
+  field.readOnly = false;
+  field.value = '';
+  field.focus();
+  $('rRecipientWarning').hidden = false;
+  $('rOtherRecipient').hidden = true;
+  dropBurn();
+};
+input('rRecipient').oninput = dropBurn;
+input('rAmount').oninput = dropBurn;
+$('rMax').onclick = () =>
+  run(4, async () => {
+    const sender = input('rSender').value.trim();
+    if (!cctp.isStellarAddress(sender)) throw new cctp.AppError('err.sender');
+    const { usdc } = await cctp.stellarAccount(sender);
+    input('rAmount').value = (Number(usdc) / 1e6).toFixed(6).replace(/\.?0+$/, '');
+    dropBurn();
+  });
+$('rCheck').onclick = () => run(4, checkReverse);
+$('rBurn').onclick = burnOnStellar;
+$('rPrepare').onclick = () => run(6, prepareReceive);
+$('rReceive').onclick = receive;
+input('rBurnTx').oninput = () => {
+  rev.msg = null;
+  showReceive(false);
+  if (cctp.isStellarTxHash(input('rBurnTx').value.trim().replace(/^0x/, '')) && $('step6').dataset.state === 'idle') setStep(6, 'active');
+};
+
+// ---- direction
+
+function setDirection(dir: Direction) {
+  document.body.dataset.dir = dir;
+  document.title = t(dir === 'reverse' ? 'meta.titleReverse' : 'meta.title');
+  history.replaceState(null, '', dir === 'reverse' ? '#stellar-polygon' : location.pathname + location.search);
+}
+$('routeSwap').onclick = () => {
+  document.body.classList.add('swapping'); // plays the motion, see style.css
+  setDirection(document.body.dataset.dir === 'reverse' ? 'forward' : 'reverse');
+};
+
 // ---- wallets
 
-async function connectStellar(target: 'recipient' | 'signer', walletId: StellarWalletId) {
+async function connectStellar(target: 'recipient' | 'signer' | 'sender', walletId: StellarWalletId) {
   const address = await stellarWallets[walletId].connect();
+  if (target === 'sender') {
+    input('rSender').value = address;
+    rev.sender = address;
+    rev.wallet = walletId;
+    log(`${stellarWallets[walletId].name}:`, address);
+    dropBurn();
+    renderBurnButton();
+    return;
+  }
   // step 1 has a recipient field; step 3 only names the signer in text
   if (target === 'recipient') input('recipient').value = address;
   log(`${stellarWallets[walletId].name}:`, address);
@@ -323,9 +566,10 @@ $('connectEvm').onclick = () =>
     log('MetaMask:', address);
   });
 document.querySelectorAll<HTMLButtonElement>('[data-connect]').forEach((b) => {
-  const target = b.dataset.connect as 'recipient' | 'signer';
+  const target = b.dataset.connect as 'recipient' | 'signer' | 'sender';
   const walletId = b.dataset.wallet as StellarWalletId;
-  b.onclick = () => run(target === 'recipient' ? 1 : 3, () => connectStellar(target, walletId));
+  const step: Step = target === 'recipient' ? 1 : target === 'signer' ? 3 : 4;
+  b.onclick = () => run(step, () => connectStellar(target, walletId));
 });
 $('max').onclick = () =>
   run(1, async () => {
@@ -353,7 +597,9 @@ $('sign').onclick = sign;
 const contracts: { key: string; chain: 'polygon' | 'stellar'; address: string; link: (a: string) => string }[] = [
   { key: 'contracts.usdc', chain: 'polygon', address: cctp.POLYGON_USDC, link: cctp.links.polygonAddress },
   { key: 'contracts.messenger', chain: 'polygon', address: cctp.TOKEN_MESSENGER_V2, link: cctp.links.polygonAddress },
+  { key: 'contracts.transmitter', chain: 'polygon', address: cctp.MESSAGE_TRANSMITTER_V2, link: cctp.links.polygonAddress },
   { key: 'contracts.forwarder', chain: 'stellar', address: cctp.CCTP_FORWARDER, link: cctp.links.stellarContract },
+  { key: 'contracts.minter', chain: 'stellar', address: cctp.TOKEN_MESSENGER_MINTER, link: cctp.links.stellarContract },
   { key: 'contracts.stellarUsdc', chain: 'stellar', address: `USDC-${cctp.STELLAR_USDC_ISSUER}`, link: () => cctp.links.stellarAsset('USDC', cctp.STELLAR_USDC_ISSUER) },
   { key: 'contracts.issuer', chain: 'stellar', address: cctp.STELLAR_USDC_ISSUER, link: cctp.links.stellarAccount },
 ];
@@ -377,11 +623,15 @@ onLangChange(() => {
   renderSigner();
   for (const [step, s] of Object.entries(lastStatus)) if (s) render(Number(step) as Step, s);
   if (state.prepared) showSign(true);
+  if (rev.msg) showReceive(true);
+  renderBurnButton();
+  document.title = t(document.body.dataset.dir === 'reverse' ? 'meta.titleReverse' : 'meta.title');
 });
 if (languages.length < 2) langSelect.hidden = true;
 apply();
 renderContracts();
 renderSigner();
+renderBurnButton();
 
 const saved = localStorage.getItem('cctp:lastBurnTx');
 if (saved) {
@@ -389,3 +639,10 @@ if (saved) {
   setStep(3, 'active');
   status(3, 'status.needSigner');
 }
+const savedStellar = localStorage.getItem(STELLAR_BURN_KEY);
+if (savedStellar) {
+  input('rBurnTx').value = savedStellar;
+  setStep(6, 'active');
+}
+// a link to #stellar-polygon opens the reverse direction; so does an unfinished reverse transfer alone
+setDirection(location.hash === '#stellar-polygon' || (savedStellar && !saved) ? 'reverse' : 'forward');
