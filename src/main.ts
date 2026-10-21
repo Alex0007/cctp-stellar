@@ -510,7 +510,7 @@ function setDirection(dir: Direction) {
   history.replaceState(null, '', dir === 'reverse' ? '#stellar-polygon' : location.pathname + location.search);
 }
 $('routeSwap').onclick = () => {
-  document.querySelector('.route-pick')!.classList.add('swapping'); // plays the arc, see style.css
+  document.body.classList.add('swapping'); // plays the motion, see style.css
   setDirection(document.body.dataset.dir === 'reverse' ? 'forward' : 'reverse');
 };
 

@@ -30,23 +30,25 @@
 </head>
 <body data-dir="forward">
   <header class="top">
-    <h1 class="fwd" data-i18n="title">USDC from Polygon to Stellar</h1>
-    <h1 class="rev" data-i18n="titleReverse">USDC from Stellar to Polygon</h1>
+    <!-- the heading names the direction in words; the button beside it swaps it -->
+    <div class="title">
+      <h1 class="fwd" data-i18n="title">USDC from Polygon to Stellar</h1>
+      <h1 class="rev" data-i18n="titleReverse">USDC from Stellar to Polygon</h1>
+      <button type="button" class="route-swap" id="routeSwap" data-i18n-title="route.swap" data-i18n-aria="route.swap">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10h14l-4-4"/><path d="M17 14H3l4 4"/></svg>
+      </button>
+    </div>
     <select id="lang" class="lang" aria-label="Language"></select>
   </header>
   <p class="route">
     <span class="route-node"><img src="/brand/usdc.svg" width="20" height="20" alt="">USDC</span>
     <span class="route-sep" aria-hidden="true"></span>
-    <!-- the current route, from and to; the button between them swaps the networks.
-         One label per network, slid between the two slots: the heading already says the direction in words -->
-    <span class="route-pick">
-      <span class="route-chip net-polygon" aria-hidden="true"><img src="/brand/polygon.svg" width="22" height="20" alt="">Polygon</span>
-      <button type="button" class="route-swap" id="routeSwap" data-i18n-title="route.swap" data-i18n-aria="route.swap">
-        <!-- at rest an arrow, so the line reads "from → to"; under the cursor or keyboard focus it becomes swap -->
-        <svg class="icon-dir" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-        <svg class="icon-swap" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10h14l-4-4"/><path d="M17 14H3l4 4"/></svg>
-      </button>
-      <span class="route-chip net-stellar" aria-hidden="true"><img src="/brand/stellar.svg" width="20" height="20" alt="">Stellar</span>
+    <!-- the current route, from → to, nothing here is a control. One label per network,
+         slid between the two slots on a swap; the heading says the direction for screen readers -->
+    <span class="route-pick" aria-hidden="true">
+      <span class="route-chip net-polygon"><img src="/brand/polygon.svg" width="22" height="20" alt="">Polygon</span>
+      <span class="route-arrow">→</span>
+      <span class="route-chip net-stellar"><img src="/brand/stellar.svg" width="20" height="20" alt="">Stellar</span>
     </span>
   </p>
   <p class="lede fwd" data-i18n-html="lede"></p>
