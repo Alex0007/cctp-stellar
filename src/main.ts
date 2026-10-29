@@ -84,11 +84,12 @@ const busy = (on: boolean) => {
   document.querySelectorAll('button').forEach((b) => (b.disabled = on || b.classList.contains('done')));
 };
 
-async function run(step: Step, fn: () => Promise<void>) {
+// Resolves to what fn returned, or undefined when it threw: the caller can tell whether to go on.
+async function run<T>(step: Step, fn: () => Promise<T>): Promise<T | undefined> {
   busy(true);
   setStep(step, 'active');
   try {
-    await fn();
+    return await fn();
   } catch (e) {
     setStep(step, 'error');
     const el = $('status' + step);
@@ -128,10 +129,11 @@ async function check() {
 
 // ---- step 2: approve and burn
 
-async function burn() {
+// Resolves to true once the burn is confirmed and a signer is set, so step 3 may start on its own.
+async function burn(): Promise<boolean> {
   const { evm, recipient, amount, fee, allowance } = state;
   if (!evm) throw new cctp.AppError('err.evm');
-  if (!window.confirm(t('confirm.burn', { amount: cctp.formatUsdc(amount), recipient }))) return;
+  if (!window.confirm(t('confirm.burn', { amount: cctp.formatUsdc(amount), recipient }))) return false;
   const wallet = await polygonWallet(evm);
   const hash = await cctp.approveAndBurn({
     wallet, evm, recipient, amount, fee, allowance,
@@ -150,8 +152,11 @@ async function burn() {
   setStep(2, 'done');
   setStep(3, 'active');
   log('burn:', hash);
-  if (state.signer) await prepare();
-  else status(3, 'status.needSigner');
+  if (!state.signer) {
+    status(3, 'status.needSigner');
+    return false;
+  }
+  return true;
 }
 
 // ---- step 3: attestation, simulation, signature
@@ -375,7 +380,8 @@ function burnOnStellar() {
   const walletName = stellarWallets[rev.wallet].name;
   // No await before this call: the wallet popup must open straight from the click.
   const signing = stellarWallets[rev.wallet].sign(tx.xdr, rev.sender);
-  run(5, async () => {
+  // Resolves to true once the burn is confirmed; the approve leg stops at step 2 for the burn's own click.
+  run(5, async (): Promise<boolean> => {
     status(5, tx.kind === 'approve' ? 'status.rSigningApprove' : 'status.rSigning', { wallet: walletName });
     const signed = await signing; // a declined signature leaves the built transaction usable
     const hash = await cctp.submitSigned(signed).catch((e) => {
@@ -392,7 +398,7 @@ function burnOnStellar() {
       rev.tx = { kind: 'burn', xdr, built: Date.now() };
       renderBurnButton();
       status(5, 'status.rApproved', { wallet: walletName }, 'ok', { href: cctp.links.stellarTx(hash), label: 'stellar.expert' });
-      return;
+      return false;
     }
     input('rBurnTx').value = hash;
     localStorage.setItem(STELLAR_BURN_KEY, hash);
@@ -402,7 +408,10 @@ function burnOnStellar() {
     setStep(5, 'done');
     setStep(6, 'active');
     log('burn:', hash);
-    await prepareReceive();
+    return true;
+  }).then((burned) => {
+    // Step 3 starts by itself, but as its own step: a hiccup there must not paint the finished burn red.
+    if (burned) run(6, prepareReceive);
   });
 }
 
@@ -579,7 +588,10 @@ $('max').onclick = () =>
     input('amount').value = (Number(balance) / 1e6).toFixed(6).replace(/\.?0+$/, '');
   });
 $('check').onclick = () => run(1, check);
-$('burn').onclick = () => run(2, burn);
+$('burn').onclick = async () => {
+  // step 3 starts by itself, but as its own step: a hiccup there must not paint the finished burn red
+  if (await run(2, burn)) await run(3, prepare);
+};
 $('prepare').onclick = () => run(3, prepare);
 // Pasting a burn hash wakes step 3 up: that is how a transfer is resumed.
 input('burnTx').oninput = () => {

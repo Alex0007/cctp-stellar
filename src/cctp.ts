@@ -222,6 +222,11 @@ export type AttestationState =
 // landed (ms), so the wait can tell a slow attestation from a transaction that is no CCTP burn at all.
 export async function burnTxTime(burnHash: string, sourceDomain = POLYGON_DOMAIN): Promise<number> {
   if (sourceDomain === STELLAR_DOMAIN) {
+    // The RPC knows a transaction the moment it lands; Horizon ingests it a few seconds later and
+    // answers 404 until then. Older transactions fall out of the RPC's history, so Horizon stays the fallback.
+    const got = await soroban.getTransaction(burnHash);
+    if (got.status === 'SUCCESS') return got.createdAt * 1000;
+    if (got.status === 'FAILED') throw new AppError('err.txFailed', { chain: 'Stellar' });
     const res = await fetch(`${HORIZON}/transactions/${burnHash}`);
     if (res.status === 404) throw new AppError('err.txNotFound', { chain: 'Stellar' });
     if (!res.ok) throw new AppError('err.horizon', { status: res.status });
