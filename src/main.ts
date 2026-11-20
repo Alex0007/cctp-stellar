@@ -180,6 +180,8 @@ async function waitForAttestation(burnHash: string, step: Step = 3, sourceDomain
     // a mistyped or foreign hash fails here at once instead of an hour of polling
     const landed = await cctp.burnTxTime(burnHash, sourceDomain);
     for (let i = 0; i < 360; i++) {
+      // Circle never has it at once; it is usually ready in about 5 seconds, then poll every 10
+      await sleep(i === 0 ? 5_000 : 10_000);
       try {
         const res = await cctp.fetchAttestation(burnHash, sourceDomain);
         if (res.state === 'complete') return res.msg;
@@ -193,7 +195,6 @@ async function waitForAttestation(burnHash: string, step: Step = 3, sourceDomain
         if (e instanceof cctp.AppError && e.key === 'err.notABurn') throw e;
         log('attestation poll failed, retrying:', describe(e));
       }
-      await sleep(10_000);
     }
   } finally {
     clearInterval(clock); // whatever ends the wait, the clock must not paint over the next status
